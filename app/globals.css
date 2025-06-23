@@ -1,26 +1,452 @@
 @import "tailwindcss";
 
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --space-pink-light: #F1CED4;
+  --space-pink-dark: #F8CCD3;
+  --space-red: #AB2945;
+  --space-brown: #391306;
+  --cream-light: #F7F5F0;
+  --cream-medium: #E8E2D5;
+  --ivory: #F1ECE4;
+  --salmon: #CB7666;
+  --rose-red: #A93D49;
+  --peach: #EAB996;
+  --warm-brown: #8B4513;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-poppins: var(--font-poppins);
+  --font-lora: var(--font-lora);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Define custom CSS variables for your theme colors */
+body { font-family: 'Poppins', sans-serif; }
+h1, h2, h3 { font-family: 'Lora', serif; }
+
+html {
+  scroll-behavior: smooth;
+}
+
+.gradient-bg {
+  background: linear-gradient(135deg, #F7F5F0 0%, #E8E2D5 50%, #D6CDB7 100%);
+}
+
+.navigationbar {
+    position: sticky;
+    top: 0;
+    display: flex;
+    width: screen;
+    min-width: fit-content;
+    flex-direction: row;
+    justify-content: space-between;
+    display: none;
+
+    background: linear-gradient(135deg, 
+        rgba(241, 236, 228, 0.98) 0%, 
+        rgba(232, 226, 213, 0.95) 100%);
+    backdrop-filter: blur(15px);
+    border-bottom: 2px solid rgba(203, 118, 102, 0.3);
+    box-shadow: 0 4px 20px rgba(57, 19, 6, 0.1);
   }
+  
+  @media (min-width: 768px) {
+    .navigationbar {
+      display: block;
+    }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* Main Book Showcase */
+  .book-showcase {
+      perspective: 1000px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 400px;
+      margin: 3.5rem 0;
+  }
+
+  .main-book {
+      width: 300px;
+      height: 420px;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
+      cursor: pointer;
+  }
+
+  .main-book:hover {
+      transform: rotateY(15deg) rotateX(5deg) scale(1.05);
+  }
+
+  .book-cover, .book-spine {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 8px;
+      background-image: url('../public/images/botw2.jpg');
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 20px 40px rgba(57, 19, 6, 0.4);
+  }
+
+  .book-spine {
+      transform: rotateY(90deg) translateZ(-10px);
+      width: 20px;
+      background: linear-gradient(135deg, #A93D49, #CB7666);
+  }
+
+  .book-cover {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #F1ECE4;
+      padding: 2rem;
+      text-align: center;
+  }
+
+  /* Animated Stars */
+  .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0.8;
+  }
+
+  .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 2s infinite alternate;
+  }
+
+  .star:nth-child(odd) {
+      animation-delay: 1s;
+  }
+
+  @keyframes bookFloat {
+      0%, 100% { transform: translateY(0px) rotateZ(0deg); }
+      25% { transform: translateY(-15px) rotateZ(2deg); }
+      50% { transform: translateY(-10px) rotateZ(0deg); }
+      75% { transform: translateY(-20px) rotateZ(-2deg); }
+  }
+
+  .timeline {
+      position: relative;
+  }
+
+  .timeline::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(to bottom, #AB2945, #CB7666);
+      border-radius: 2px;
+  }
+
+  .timeline-item {
+      position: relative;
+      margin: 3rem 0;
+  }
+
+  .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 20px;
+      background: #AB2945;
+      border-radius: 50%;
+      border: 4px solid #F7F5F0;
+      z-index: 1;
+  }
+
+/* Animation for the main book */
+/* unlimited slider  */
+.wrap {
+    width: 300px;
+    margin: 2rem;
+    align-items: center;
+    transform-style: preserve-3d;
+    transform: perspective(100rem);
+    cursor: pointer;
 }
+.item {
+    --rX: 0deg;
+    --rY: 0deg;
+    --bX: 50%;
+    --bY: 80%;
+    width: 100%;
+    border-radius: 20px;
+    transform: rotateX(var(--rX)) rotateY(var(--rY));
+    transition: 0.2s;
+    padding: 20px;
+}
+.item img{
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 20px;
+    box-shadow: 0 30px 20px #5559;
+    z-index: -1;
+}
+
+.slider{
+    width: 100%;
+    height: var(--height);
+    overflow: hidden;
+    mask-image: linear-gradient(
+        to right,
+        transparent,
+        #000 10% 90%,
+        transparent
+    );
+}
+.slider .list{
+    display: flex;
+    width: 100%;
+    min-width: calc(var(--width) * var(--quantity));
+    position: relative;
+}
+.slider .list .item{
+    width: var(--width);
+    height: var(--height);
+    position: absolute;
+    left: 100%;
+    animation: autoRun 10s linear infinite;
+    transition: filter 0.5s;
+    animation-delay: calc( (10s / var(--quantity)) * (var(--position) - 1) - 10s)!important;
+}
+.slider .list .item img{
+    width: 100%;
+}
+@keyframes autoRun{
+    from{
+        left: 100%;
+    }to{
+        left: calc(var(--width) * -1);
+    }
+}
+
+/* if user hovers on the slider, pause the animation */
+.slider:hover .item{
+    animation-play-state: paused!important;
+    filter: grayscale(1);
+}
+.slider .item:hover{
+    filter: grayscale(0);
+}
+.slider[reverse="true"] .item{
+    animation: reversePlay 10s linear infinite;
+}
+@keyframes reversePlay{
+    from{
+        left: calc(var(--width) * -1);
+    }to{
+        left: 100%;
+    }
+}
+
+/* Cozy Space Library Background */
+/* New Warm Background */
+.space-bg {
+    background: linear-gradient(135deg, #A93D49 0%, #CB7666 25%, #EAB996 50%, #F1ECE4 75%, #F1ECE4 100%);
+    position: relative;
+    min-height: 100vh;
+}
+
+/* Animated Stars */
+.stars {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.star {
+    position: absolute;
+    background: #F1ECE4;
+    border-radius: 50%;
+    animation: twinkle 2s infinite alternate;
+}
+
+.star:nth-child(odd) {
+    animation-delay: 1s;
+}
+
+/* Cozy Nebula Effect */
+.nebula {
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at center, rgba(234, 185, 150, 0.3) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(203, 118, 102, 0.2) 0%, transparent 50%),
+                radial-gradient(ellipse at 20% 80%, rgba(169, 61, 73, 0.15) 0%, transparent 50%);
+    animation: drift 20s linear infinite;
+    pointer-events: none;
+}
+
+/* Floating Planets */
+.planet {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.6;
+    animation: float 8s ease-in-out infinite;
+}
+
+.planet-1 {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(45deg, #A93D49, #EAB996);
+    top: 15%;
+    right: 10%;
+    animation-delay: 0s;
+}
+
+.planet-2 {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(45deg, #CB7666, #F1ECE4);
+    top: 60%;
+    left: 5%;
+    animation-delay: 2s;
+}
+
+.planet-3 {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(45deg, #EAB996, #A93D49);
+    bottom: 20%;
+    right: 15%;
+    animation-delay: 4s;
+}
+
+/* Floating Books */
+.floating-book {
+    position: absolute;
+    width: 80px;
+    height: 110px;
+    border-radius: 4px;
+    animation: bookFloat 6s ease-in-out infinite;
+    box-shadow: 0 10px 20px rgba(139, 69, 19, 0.3);
+}
+
+.floating-book::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 5px;
+    right: 5px;
+    bottom: 5px;
+    background: rgba(241, 236, 228, 0.2);
+    border-radius: 2px;
+}
+
+.book-1 {
+    top: 8%;
+    left: 15%;
+    animation-delay: 0s;
+    background-image: url(/images/botw1.jpg);
+    background-size: cover;
+    background-position: center;
+}
+
+.book-2 {
+    bottom: 15%;
+    right: 20%;
+    animation-delay: 2s;
+    background-image:url(/images/crescent_city_botw.jpg);
+    background-size: cover;
+    background-position: center;
+
+}
+
+.book-3 {
+    top: 14%;
+    right: 5%;
+    animation-delay: 4s;
+    background-image: url(/images/book1.png);
+    background-size: cover;
+    background-position: center;
+}
+
+.book-4 {
+    bottom: 10%;
+    left: 15%;
+    animation-delay: 1s;
+    background-image: url(/images/book3.png);
+    background-size: cover;
+    background-position: center;
+}
+
+/* Feature Cards */
+.feature-card {
+    background: rgba(241, 236, 228, 0.9);
+    border: 2px solid rgba(203, 118, 102, 0.3);
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+    background: rgba(234, 185, 150, 0.9);
+    border-color: rgba(169, 61, 73, 0.5);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(169, 61, 73, 0.2);
+}
+
+/* CTA Section */
+.cta-section {
+    background: linear-gradient(135deg, rgba(234, 185, 150, 0.3) 0%, rgba(241, 236, 228, 0.5) 100%);
+}
+
+/* Animations */
+@keyframes twinkle {
+    0% { opacity: 0.3; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.2); }
+}
+
+@keyframes drift {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    25% { transform: translateY(-20px) rotate(2deg); }
+    50% { transform: translateY(-15px) rotate(0deg); }
+    75% { transform: translateY(-25px) rotate(-2deg); }
+}
+
+@keyframes fadeInUp {
+    0% { opacity: 0; transform: translateY(30px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .floating-book, .planet {
+        display: none;
+    }
+
+    .main-book {
+        width: 150px;
+        height: 225px;
+    }
+}
+
+
+
+
