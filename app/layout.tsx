@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Lora, Poppins } from "next/font/google";
 import "./globals.css";
+import LandingBar from "@/components/LandingBar";
+import Footer from "@/components/Footer";
 
 const lora = Lora({
   variable: "--font-lora",
@@ -27,9 +29,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${poppins.variable} ${poppins.variable} antialiased`}
+        className={`${poppins.variable} ${poppins.variable} antialiased min-h-screen flex flex-col`}
       >
-        {children}
+        <div className="flex-1 flex flex-col">
+          {children}
+        </div>
+      <footer className="bg-(--space-brown) text-white py-8">
+          <div className="container mx-auto px-6 text-center">
+              <p>&copy; 2025 My Book Space. All Rights Reserved to Jennifer :).</p>
+          </div>
+      </footer>
       </body>
     </html>
   );

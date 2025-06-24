@@ -45,13 +45,13 @@ export default function Home() {
       planetRefs.current.forEach((planet, index) => {
         if (planet) {
           const speed = 0.5 + index * 0.2;
-          planet.style.transform = `translateY(${scrolled * speed}px)`;
+          planet.style.transform = `translateY(${Math.min(scrolled * speed, 200)}px)`;
         }
       });
       floatingBookRefs.current.forEach((book, index) => {
         if (book) {
           const speed = 0.3 + index * 0.1;
-          book.style.transform = `translateY(${scrolled * speed}px)`;
+          book.style.transform = `translateY(${Math.min(scrolled * speed, 200)}px)`
         }
       });
     }
@@ -78,7 +78,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br space-bg">
+    <div className="relative bg-gradient-to-br space-bg">
       {/* Background Elements */}
       <div className="stars" ref={starsRef}></div>
       <div className="nebula" ref={nebulaRef}></div>
@@ -111,7 +111,6 @@ export default function Home() {
       ></div>
 
       <LandingBar />
-
       <main>
           {/* Hero Section */}
           <section className="relative text-center min-h-screen flex items-center justify-center">
@@ -119,7 +118,7 @@ export default function Home() {
                   <div className="animate-fade-in-up">
                       <h1 className="brown-text hero-text text-5xl md:text-7xl font-bold text-space-brown leading-tight mb-6">
                           Where stories find their  
-                          <span className="text-space-red"> space</span>.
+                          <span className="text-(--space-red)"> space</span>.
                       </h1>
                       <p className="text-lg md:text-xl mt-4 max-w-2xl mx-auto text-gray-700 mb-8">
                           Track your reading, organize your digital shelves, and discover your next great read, all in one beautiful app.
@@ -136,7 +135,7 @@ export default function Home() {
                   </div>
 
                   <div className="mt-8 animate-fade-in-up" style={{ animationDelay: "0.6s" }}>
-                      <a href="/login-signup/register.html" className="bg-space-red text-white px-10 py-5 rounded-lg font-semibold text-lg hover:bg-opacity-90 transition-all transform hover:scale-105 shadow-lg">
+                      <a href="/sign-up" className="bg-space-red text-white px-10 py-5 rounded-lg font-semibold text-lg hover:bg-opacity-90 transition-all transform hover:scale-105 shadow-lg">
                           Start Reading Now!
                       </a>
                   </div>
@@ -174,7 +173,7 @@ export default function Home() {
               </div>
           </section>
         
-          {/* Features Section */}
+          {/* Features Section
         <div className="slider w-[100px] h-[50px]" style={{ "--quantity": 10 } as React.CSSProperties}>
             <div className="list">
                 <div className="item" style={{ "--position": 1 } as React.CSSProperties}>Join Now</div>
@@ -188,16 +187,9 @@ export default function Home() {
                 <div className="item" style={{ "--position": 9 } as React.CSSProperties}>Its</div>
                 <div className="item" style={{ "--position": 10 } as React.CSSProperties}>Fun</div>
             </div>
-        </div>
+        </div> */}
 
       </main>
-
-      {/* Footer */}
-      <footer className="bg-space-brown text-white py-8">
-          <div className="container mx-auto px-6 text-center">
-              <p>&copy; 2025 My Book Space. All Rights Reserved to Jennifer :).</p>
-          </div>
-      </footer>
     </div>
   );
 }

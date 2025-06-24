@@ -1,8 +1,7 @@
 export const navbarLinks = [
   {
-    imgURL: "/icons/home.svg",
-    route: "/",
-    label: "Home",
+    route: "/dashboard",
+    label: "Dashboard",
   },
   {
     route: "/my-books",
@@ -17,6 +16,8 @@ export const navbarLinks = [
     label: "Recommendations",
   },
   {
-    imgURL: "/icons/money-send.svg",
+    type: "icon",
+    imgURL: "/images/icons8-setting-30.png",
+    label: "Settings",
   }
 ];
