@@ -1,8 +1,23 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@config "../tailwind.config.ts";
+
 
 @custom-variant dark (&:is(.dark *));
 
+@theme{
+    --space-pink-light: oklch(88.265% 0.04005 6.145);
+    --space-pink-dark: oklch(87.5% 0.039 6.5);
+    --space-red: oklch(48.5% 0.19 7.5);
+    --space-brown: oklch(23.5% 0.07 29);
+    --cream-light: oklch(96.5% 0.015 98);
+    --cream-medium: oklch(92.5% 0.018 98);
+    --ivory: oklch(95% 0.013 98);
+    --salmon: oklch(70% 0.11 35);
+    --rose-red: oklch(49% 0.17 10);
+    --peach: oklch(85% 0.08 55);
+    --warm-brown: oklch(36% 0.13 29);
+}
 :root {
   --space-pink-light: oklch(88.265% 0.04005 6.145);
     --space-pink-dark: oklch(87.5% 0.039 6.5);
@@ -96,8 +111,33 @@ html {
 .brown-text{
     color: var(--space-brown);
 }
+.warm-brown-text{
+    color: var(--warm-brown);
+}
+.cream-text{
+    color: var(--cream-light);
+}
 .space-red-text{
     color: var(--space-red);
+}
+.bg-space-red{
+    background-color: var(--space-red);
+}
+
+.hero-section-bg  {
+    background: linear-gradient(135deg, 
+        rgba(247, 245, 240, 0.95) 0%, 
+        rgba(241, 236, 228, 0.9) 30%,
+        rgba(241, 206, 212, 0.8) 70%,
+        rgba(248, 204, 211, 0.9) 100%) !important;
+    backdrop-filter: blur(20px) !important;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #391306 0%, #8B4513 40%, #A93D49 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
   .navbar-link {
@@ -356,6 +396,127 @@ html {
     background: linear-gradient(135deg, rgba(234, 185, 150, 0.3) 0%, rgba(241, 236, 228, 0.5) 100%);
 }
 
+        .tab-button {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.7) 0%, 
+                rgba(241, 206, 212, 0.3) 100%);
+            border: 1px solid rgba(203, 118, 102, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button.active {
+            background: linear-gradient(135deg, #EAB996 0%, #CB7666 100%);
+            border-color: #CB7666;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(203, 118, 102, 0.3);
+        }
+        
+        .tab-button:hover:not(.active) {
+            background: linear-gradient(135deg, 
+                rgba(241, 206, 212, 0.4) 0%, 
+                rgba(234, 185, 150, 0.3) 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(203, 118, 102, 0.2);
+        }
+        
+        .book-card {
+            background: linear-gradient(145deg, 
+                rgba(255, 255, 255, 0.95) 0%, 
+                rgba(241, 236, 228, 0.8) 50%,
+                rgba(241, 206, 212, 0.15) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(203, 118, 102, 0.15);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .book-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(57, 19, 6, 0.12);
+            border-color: rgba(203, 118, 102, 0.25);
+        }
+        
+        .status-badge {
+            background: linear-gradient(135deg, #F1CED4 0%, #F8CCD3 100%);
+            color: #8B4513;
+            border: 1px solid rgba(203, 118, 102, 0.2);
+        }
+        
+        .status-badge.reading {
+            background: linear-gradient(135deg, #EAB996 0%, #CB7666 100%);
+            color: white;
+        }
+        
+        .status-badge.finished {
+            background: linear-gradient(135deg, #CB7666 0%, #A93D49 100%);
+            color: white;
+        }
+        
+        .edit-button {
+            background: linear-gradient(135deg, #F1ECE4 0%, #E8E2D5 100%);
+            border: 1px solid rgba(139, 69, 19, 0.2);
+            color: #8B4513;
+            transition: all 0.3s ease;
+        }
+        
+        .edit-button:hover {
+            background: linear-gradient(135deg, #EAB996 0%, #CB7666 100%);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .delete-button {
+            background: linear-gradient(135deg, #F1ECE4 0%, #E8E2D5 100%);
+            border: 1px solid rgba(171, 41, 69, 0.2);
+            color: #AB2945;
+            transition: all 0.3s ease;
+        }
+        
+        .delete-button:hover {
+            background: linear-gradient(135deg, #AB2945 0%, #A93D49 100%);
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .star-rating {
+            color: #EAB996;
+        }
+        
+        .star-rating.filled {
+            color: #CB7666;
+        }
+        
+        @media (max-width: 768px) {
+            .floating-book { display: none; }
+        }
+        .heart-button{
+            width: 70px;
+            height: 70px;
+            color: #d1d5db;
+            border-radius: 50%;
+            font-size: 2.5rem; 
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+        }
+
+        .heart-button:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+            transform: scale(1.13);
+            box-shadow: 0 6px 18px rgba(239, 68, 68, 0.25);
+        }
+        
+        .heart-button.favorited {
+            color: #ef4444;
+            animation: heartBeat 0.6s ease-in-out;
+            background-color: rgba(239, 68, 68, 0.22);
+            box-shadow: 0 6px 18px rgba(239, 68, 68, 0.25);
+        }
+        
+        .heart-button:not(.favorited) {
+            color: #7b7d80;      
+        }
+        
+
 /* Animations */
 @keyframes twinkle {
     0% { opacity: 0.3; transform: scale(1); }
@@ -392,6 +553,16 @@ html {
 }
 
 @theme inline {
+ --space-pink-light: var(--space-pink-light);
+ --space-pink-dark: var(--space-pink-dark);
+ --space-red: var(--space-red);
+ --space-brown: var(--space-brown);
+ --cream-light: var(--cream-light);
+ --cream-medium: var(--cream-medium);
+ --ivory: var(--ivory);
+ --salmon: var(--salmon);
+ --rose-red: var(--rose-red);
+ --peach: var(--peach);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

@@ -1,15 +1,28 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react'
+import { auth } from "@/lib/firebase.browser";
 import { navbarLinks } from '@/constants'
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { signOut} from "firebase/auth";
 
 const NavBar = () => {
   const pathname = usePathname();
+  const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push('/sign-in'); // Redirect to sign-in after logout
+    } catch (error) {
+      console.error('Logout error:', error);
+      alert('Error logging out. Please try again.');
+    }
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -56,7 +69,7 @@ const NavBar = () => {
                           <li>
                             <button
                               className="block w-full text-left px-4 py-2 brown-text hover:space-red-text hover:bg-gray-100"
-                              onClick={() => {/* handle logout here */}}
+                              onClick={handleLogout}
                             >
                               Log Out
                             </button>

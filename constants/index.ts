@@ -21,3 +21,6 @@ export const navbarLinks = [
     label: "Settings",
   }
 ];
+
+type TabType = 'wantToRead' | 'reading' | 'finished';
+type ModalType = 'wantToRead-modal' | 'reading-modal' | 'finished-modal';

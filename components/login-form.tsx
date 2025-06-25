@@ -1,7 +1,7 @@
 'use client'
 
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
-import { app } from "@/lib/firebase.browser";
+import { app, auth } from "@/lib/firebase.browser";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -29,8 +29,6 @@ export function LoginForm({ type, className, ...props }: LoginFormProps) {
     const email = (form.elements.namedItem("email") as HTMLInputElement).value;
     const password = (form.elements.namedItem("password") as HTMLInputElement).value;
     const confirmPassword = (form.elements.namedItem("confirmPassword") as HTMLInputElement)?.value;
-
-    const auth = getAuth(app);
     var isValid = true; // Let's use isValid for the overall form state
 
 
