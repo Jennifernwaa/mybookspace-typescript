@@ -3,30 +3,26 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth } from '@/lib/firebase.browser';
+import { auth, db } from '@/lib/firebase.browser';
 import HeroSection from '@/components/HeroSection';
 import StatsSection from '@/components/StatsSection';
 import QuickActionsSection from '@/components/QuickActionsSection';
 import CurrentlyReadingSection from '@/components/CurrentlyReadingSection';
 import ReadingGoalSection from '@/components/ReadingGoalSection';
-import ReadingModal from '@/components/ReadingModal';
 import NameEntryModal from '@/components/NameEntryModal';
-import Footer from '@/components/Footer';
 import { useDashboard } from '@/hooks/useDashboard';
 import { Book } from '@/types';
-import { Navigation } from 'lucide-react';
+import BookEditModal from '@/components/BookEditModal';
+import { doc, updateDoc } from "firebase/firestore";
 
 const Dashboard: React.FC = () => {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  // Listen for auth state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) { // Later add && user.emailVerified
+      if (user) {
         setCurrentUser(user);
-      // } else if (user) { // Later add && user.emailVerified
-      //   router.push('/verify-email');
       } else {
         router.push('/sign-in');
       }
@@ -34,10 +30,8 @@ const Dashboard: React.FC = () => {
     return () => unsubscribe();
   }, [router]);
 
-  // Dashboard data and handlers
   const {
     userData,
-    allBooks,
     isLoading,
     showNameEntry,
     handleNameSubmission,
@@ -48,36 +42,34 @@ const Dashboard: React.FC = () => {
   const [showReadingModal, setShowReadingModal] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
+  // Open modal when a book is clicked
   const handleOpenReadingModal = (book: Book) => {
     setSelectedBook(book);
     setShowReadingModal(true);
   };
 
+  // Close modal
   const handleCloseReadingModal = () => {
     setSelectedBook(null);
     setShowReadingModal(false);
   };
 
-  const handleUpdateProgress = async (bookId: string, progressData: {
-    title: string;
-    author: string;
-    status: string;
-    progress: number;
-  }) => {
-    try {
-      // You should implement updateBookProgress in your useDashboard hook
-      await refetchUserData();
-      setShowReadingModal(false);
-    } catch (error) {
-      console.error('Error updating book progress:', error);
-      throw error;
-    }
+  // Save progress update
+  const handleSaveProgress = async (updated: Partial<Book>) => {
+    if (!currentUser || !selectedBook) return;
+    // Update Firestore
+    await updateDoc(
+      doc(db, "users", currentUser.uid, "books", selectedBook.id),
+      updated
+    );
+    await refetchUserData();
+    handleCloseReadingModal();
   };
 
   if (isLoading || !currentUser) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-cream-light via-space-pink-light to-peach flex items-center justify-center">
-        <div className="text-6xl animate-pulse">📚</div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-6xl animate-pulse">Loading...</div>
       </div>
     );
   }
@@ -118,11 +110,14 @@ const Dashboard: React.FC = () => {
         <ReadingGoalSection userData={userData} />
       </main>
 
+      {/* BookEditModal for editing reading progress */}
       {showReadingModal && selectedBook && (
-        <ReadingModal
-          book={selectedBook}
+        <BookEditModal
+          isOpen={showReadingModal}
           onClose={handleCloseReadingModal}
-          onUpdate={(progressData) => handleUpdateProgress(selectedBook.id, progressData)}
+          book={selectedBook}
+          tab="reading"
+          onSave={handleSaveProgress}
         />
       )}
     </div>

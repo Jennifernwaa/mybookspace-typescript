@@ -22,5 +22,5 @@ export const navbarLinks = [
   }
 ];
 
-type TabType = 'wantToRead' | 'reading' | 'finished';
-type ModalType = 'wantToRead-modal' | 'reading-modal' | 'finished-modal';
+export type TabType = 'wantToRead' | 'reading' | 'finished';
+export type ModalType = 'wantToRead-modal' | 'reading-modal' | 'finished-modal';

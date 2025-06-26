@@ -21,6 +21,14 @@ export interface Book {
 
 }
 
+export interface BookEditModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  book: Book | null;
+  tab: TabType;
+  onSave: (updated: Partial<Book>) => Promise<void>;
+}
+
 export interface UserData {
   userId: string;
   fullName: string;

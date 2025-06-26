@@ -46,7 +46,11 @@ const MyBooksTabs: React.FC<MyBooksTabsProps> = ({
           >
             <span className="mr-2">{tab.icon}</span>
             {tab.label}
-            <span className="ml-2 bg-white bg-opacity-30 rounded-full px-2 py-1 text-sm">
+            <span className={`ml-2 rounded-full px-2 py-1 text-sm ${
+              activeTab === tab.key
+                ? "bg-white bg-opacity-30 text-black"
+                : "bg-white bg-opacity-30"
+            }`}>
               {books.filter((b) =>
                 tab.key === "wantToRead"
                   ? b.status === "wantToRead"

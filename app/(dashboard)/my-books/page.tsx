@@ -6,6 +6,7 @@ import { onAuthStateChanged, User } from "firebase/auth";
 import { collection, doc, getDocs, updateDoc, deleteDoc } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase.browser";
 import { Book } from "@/types";
+import BookEditModal from "@/components/BookEditModal";
 import MyBooksTabs from "@/components/MyBooksTabs";
 // import BookEditModal from "@/components/BookEditModal"; // You can implement this modal as needed
 
@@ -14,7 +15,7 @@ const MyBooksPage: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [books, setBooks] = useState<Book[]>([]);
   const [activeTab, setActiveTab] = useState("wantToRead");
-  // const [editingBook, setEditingBook] = useState<Book | null>(null);
+  const [editingBook, setEditingBook] = useState<Book | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -39,9 +40,7 @@ const MyBooksPage: React.FC = () => {
   }, [currentUser]);
 
   const handleEdit = (book: Book) => {
-    // setEditingBook(book);
-    // Implement modal logic here
-    alert("Edit modal not implemented in this example.");
+    setEditingBook(book);
   };
 
   const handleDelete = async (book: Book) => {
@@ -60,6 +59,17 @@ const MyBooksPage: React.FC = () => {
     setBooks((prev) =>
       prev.map((b) => (b.id === book.id ? { ...b, favorite: newFavorite } : b))
     );
+  };
+
+  const handleSaveEdit = async (updated: Partial<Book>) => {
+    if (!currentUser || !editingBook) return;
+    await updateDoc(doc(db, "users", currentUser.uid, "books", editingBook.id), updated);
+    setBooks((prev) =>
+      prev.map((b) =>
+        b.id === editingBook.id ? { ...b, ...updated } : b
+      )
+    );
+    setEditingBook(null);
   };
 
   return (
@@ -88,13 +98,15 @@ const MyBooksPage: React.FC = () => {
           <span className="mr-2">➕</span>Add New Book
         </button>
       </div>
-      {/* {editingBook && (
+      {editingBook && (
         <BookEditModal
-          book={editingBook}
+          isOpen={!!editingBook}
           onClose={() => setEditingBook(null)}
-          onSave={...}
+          book={editingBook}
+          tab={activeTab as "wantToRead" | "reading" | "finished"}
+          onSave={handleSaveEdit}
         />
-      )} */}
+      )}
     </div>
   );
 };

@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import LandingBar from "@/components/LandingBar";
 import About from "@/components/About";
 import Contact from "@/components/Contact";
+import './globals.css';
 
 export default function Home() {
   const starsRef = useRef<HTMLDivElement>(null);

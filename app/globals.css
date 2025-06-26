@@ -22,7 +22,7 @@
   --space-pink-light: oklch(88.265% 0.04005 6.145);
     --space-pink-dark: oklch(87.5% 0.039 6.5);
     --space-red: oklch(48.5% 0.19 7.5);
-    --space-brown: oklch(23.5% 0.07 29);
+    --space-brown: oklch(23.574% 0.07061 28.748);
     --cream-light: oklch(96.5% 0.015 98);
     --cream-medium: oklch(92.5% 0.018 98);
     --ivory: oklch(95% 0.013 98);
@@ -133,11 +133,213 @@ html {
     backdrop-filter: blur(20px) !important;
 }
 
+.glass-card {
+    background: linear-gradient(145deg, 
+        rgba(255, 255, 255, 0.95) 0%, 
+        rgba(241, 236, 228, 0.85) 50%,
+        rgba(241, 206, 212, 0.3) 100%);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(203, 118, 102, 0.2);
+    box-shadow: 0 12px 40px rgba(57, 19, 6, 0.1);
+}
+
+        .search-card {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.98) 0%, 
+                rgba(241, 236, 228, 0.9) 100%);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(203, 118, 102, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .search-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(57, 19, 6, 0.1);
+        }
+
+        .search-button {
+            background: linear-gradient(135deg, #EAB996 0%, #CB7666 100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .search-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s;
+        }
+        
+        .search-button:hover::before {
+            left: 100%;
+        }
+        
+        .search-button:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(203, 118, 102, 0.3);
+        }
+        
+        .save-button {
+            background: linear-gradient(135deg, #A93D49 0%, #AB2945 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .save-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(171, 41, 69, 0.3);
+            background: linear-gradient(135deg, #AB2945 0%, #8B2A3A 100%);
+        }
+        
+        .divider-line {
+            background: linear-gradient(90deg, transparent, #CB7666, transparent);
+            height: 1px;
+        }
+        
+        .result-card {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.95) 0%, 
+                rgba(241, 206, 212, 0.1) 100%);
+            border: 1px solid rgba(203, 118, 102, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .result-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(57, 19, 6, 0.12);
+            border-color: rgba(203, 118, 102, 0.3);
+        }
+
+                
+        .loading-spinner {
+            border: 3px solid rgba(203, 118, 102, 0.3);
+            border-top: 3px solid #CB7666;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #CB7666 0%, #A93D49 100%);
+            height: 4px;
+            border-radius: 2px;
+            transition: width 0.5s ease;
+        }
+
+                .book-preview-card {
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.9) 0%, 
+                rgba(241, 236, 228, 0.8) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(203, 118, 102, 0.15);
+            transition: all 0.3s ease;
+        }
+        
+        .book-preview-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(57, 19, 6, 0.12);
+            border-color: rgba(203, 118, 102, 0.25);
+        }
+
+                .input-field {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(203, 118, 102, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            background: rgba(255, 255, 255, 1);
+            border-color: rgba(203, 118, 102, 0.4);
+            box-shadow: 0 0 0 3px rgba(241, 206, 212, 0.3);
+            outline: none;
+        }
+
 .gradient-text {
     background: linear-gradient(135deg, #391306 0%, #8B4513 40%, #A93D49 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, 
+        rgba(255, 255, 255, 0.98) 0%, 
+        rgba(241, 206, 212, 0.15) 100%);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(203, 118, 102, 0.15);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(241, 206, 212, 0.4), transparent);
+    transition: left 0.6s;
+}
+
+.stat-card:hover::before {
+    left: 100%;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 20px 60px rgba(57, 19, 6, 0.15);
+    border-color: rgba(203, 118, 102, 0.3);
+}
+
+        .action-button {
+    background: linear-gradient(135deg, 
+        rgba(241, 236, 228, 0.9) 0%, 
+        rgba(232, 226, 213, 0.95) 100%);
+    border: 1px solid rgba(139, 69, 19, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.action-button::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: linear-gradient(135deg, #EAB996 0%, #CB7666 100%);
+    border-radius: 50%;
+    transition: all 0.5s ease;
+    transform: translate(-50%, -50%);
+    z-index: 0;
+}
+
+.action-button:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.action-button:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 12px 30px rgba(57, 19, 6, 0.2);
+    border-color: rgba(139, 69, 19, 0.4);
+}
+
+.action-button > * {
+    position: relative;
+    z-index: 1;
+}
+
+.action-button:hover .button-text {
+    color: #F1ECE4;
 }
 
   .navbar-link {

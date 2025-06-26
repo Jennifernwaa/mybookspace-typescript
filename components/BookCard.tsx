@@ -21,7 +21,7 @@ const BookCard: React.FC<BookCardProps> = ({ book, tab, onEdit, onDelete, onTogg
               onClick={() => onToggleFavorite(book)}
               aria-label="Toggle favorite"
             >
-              ♥︎
+              ♥
             </button>
           )}
         </div>

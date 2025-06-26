@@ -74,7 +74,7 @@ const CurrentlyReadingSection: React.FC<CurrentlyReadingSectionProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {displayBooks.map((book, index) => {
             const progress = book.progress || 0;
-            const coverUrl = book.cover_url || "/images/placeholder-book.png";
+            const coverUrl = book.cover_url || "../public/images/hardcover.png";
             
             return (
               <div 
@@ -82,18 +82,18 @@ const CurrentlyReadingSection: React.FC<CurrentlyReadingSectionProps> = ({
                 className="book-preview-card rounded-2xl p-6 group cursor-pointer" 
                 onClick={() => onBookClick(book)}
               >
-                <div className={`h-40 bg-gradient-to-br ${gradients[index % 3]} rounded-xl mb-4 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300`}>
+                <div className={`bg-gradient-to-br ${gradients[index % 3]} rounded-xl mb-4 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300`}>
                   <Image
-                    src={coverUrl}
-                    alt={`Cover for ${book.title}`}
-                    width={150}
-                    height={200}
-                    className="object-cover h-full w-full rounded-xl"
-                    style={{ maxHeight: '100%', maxWidth: '100%' }}
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = '/images/placeholder-book.png';
-                    }}
+                  src={
+                    book.cover_url && book.cover_url !== "https://via.placeholder.com/150?text=No+Cover"
+                    ? book.cover_url
+                    : "/images/hardcover.png"
+                  }
+                  alt={`Cover for ${book.title}`}
+                  width={150}
+                  height={300}
+                  className="object-cover h-full w-full rounded-xl"
+                  style={{ maxHeight: '100%', maxWidth: '100%' }}
                   />
                 </div>
                 <h3 className="font-bold text-space-brown mb-2 text-lg truncate">
@@ -110,7 +110,7 @@ const CurrentlyReadingSection: React.FC<CurrentlyReadingSectionProps> = ({
                   <div className="w-full bg-cream-medium rounded-full h-2">
                     <div 
                       className="progress-bar rounded-full transition-all duration-500" 
-                      style={{ width: `${progress}%` }}
+                      style={{ width: `${progress}%`, backgroundColor: 'var(--space-red)' }}
                     ></div>
                   </div>
                 </div>
