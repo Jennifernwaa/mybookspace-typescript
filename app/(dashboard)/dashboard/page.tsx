@@ -2,53 +2,48 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth, db } from '@/lib/firebase.browser';
 import HeroSection from '@/components/HeroSection';
 import StatsSection from '@/components/StatsSection';
 import QuickActionsSection from '@/components/QuickActionsSection';
 import CurrentlyReadingSection from '@/components/CurrentlyReadingSection';
 import ReadingGoalSection from '@/components/ReadingGoalSection';
 import NameEntryModal from '@/components/NameEntryModal';
-import { useDashboard } from '@/hooks/useDashboard';
-import { Book } from '@/types';
 import BookEditModal from '@/components/BookEditModal';
-import { doc, updateDoc } from "firebase/firestore";
+import { Book } from '@/types';
 
 const Dashboard: React.FC = () => {
   const router = useRouter();
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setCurrentUser(user);
-      } else {
-        router.push('/sign-in');
-      }
-    });
-    return () => unsubscribe();
-  }, [router]);
-
-  const {
-    userData,
-    isLoading,
-    showNameEntry,
-    handleNameSubmission,
-    refetchUserData,
-  } = useDashboard(currentUser);
-
-  // Modal state
+  const [userData, setUserData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [showReadingModal, setShowReadingModal] = useState(false);
-  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [selectedBook, setSelectedBook] = useState<any>(null);
 
-  // Open modal when a book is clicked
-  const handleOpenReadingModal = (book: Book) => {
+  // Replace with your auth logic to get userId
+  const userId = typeof window !== "undefined" ? localStorage.getItem('userId') : null;
+    
+  useEffect(() => {
+    if (!userId) {
+      router.push('/sign-in');
+      return;
+    }
+    const fetchUserData = async () => {
+      setIsLoading(true);
+      const res = await fetch(`/api/dashboard/user/${userId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setUserData(data.user);
+      }
+      setIsLoading(false);
+    };
+    fetchUserData();
+  }, [userId, router]);
+
+
+  const handleOpenReadingModal = (book: any) => {
     setSelectedBook(book);
     setShowReadingModal(true);
   };
 
-  // Close modal
   const handleCloseReadingModal = () => {
     setSelectedBook(null);
     setShowReadingModal(false);
@@ -56,17 +51,22 @@ const Dashboard: React.FC = () => {
 
   // Save progress update
   const handleSaveProgress = async (updated: Partial<Book>) => {
-    if (!currentUser || !selectedBook) return;
-    // Update Firestore
-    await updateDoc(
-      doc(db, "users", currentUser.uid, "books", selectedBook.id),
-      updated
-    );
-    await refetchUserData();
+    if (!selectedBook) return;
+    await fetch(`/api/dashboard/book/${selectedBook._id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updated),
+    });
+    // Refetch user data
+    const res = await fetch(`/api/dashboard/user/${userId}`);
+    if (res.ok) {
+      const data = await res.json();
+      setUserData(data.user);
+    }
     handleCloseReadingModal();
   };
 
-  if (isLoading || !currentUser) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-6xl animate-pulse">Loading...</div>
@@ -74,9 +74,16 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  if (showNameEntry) {
-    return <NameEntryModal isVisible={showNameEntry} onSubmit={handleNameSubmission} />;
-  }
+  // Uncomment and implement the following if you want to use the NameEntryModal:
+  // const [showNameEntry, setShowNameEntry] = useState(false);
+  // const handleNameSubmission = (name: string) => {
+  //   // handle name submission logic here
+  //   setShowNameEntry(false);
+  // };
+
+  // if (showNameEntry) {
+  //   return <NameEntryModal isVisible={showNameEntry} onSubmit={handleNameSubmission} />;
+  // }
 
   return (
     <div className="min-h-screen">

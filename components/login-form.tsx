@@ -25,6 +25,7 @@ export function LoginForm({ type, className, ...props }: LoginFormProps) {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+
     const form = e.currentTarget;
     const email = (form.elements.namedItem("email") as HTMLInputElement).value;
     const password = (form.elements.namedItem("password") as HTMLInputElement).value;
@@ -33,29 +34,40 @@ export function LoginForm({ type, className, ...props }: LoginFormProps) {
 
 
     try {
-      if (type === "sign-up") {
-        if (password !== confirmPassword) {
-          setError("Passwords do not match.");
-          window.alert("Passwords do not match. Please try again.");
-          return;
+        const endpoint = type === 'sign-up' ? '/api/auth/sign-up' : '/api/auth/sign-in';
+        const payload: Record<string, string> = { email, password };
+
+        if (type === 'sign-up') {
+          if (password !== confirmPassword) {
+            setError('Passwords do not match.');
+            return;
+          }
+          payload.confirmPassword = confirmPassword;
         }
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        await sendEmailVerification(userCredential.user);
-        router.push("/"); // Use router.push for client-side navigation
 
-        // Optionally, show a message to check email
-      } else {
-        await signInWithEmailAndPassword(auth, email, password);
-        // Redirect or show success
-        router.push("/dashboard"); // Redirect after sign in
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
 
-      }
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || 'Authentication failed');
+        }
+
+        // Safe check
+          if (data.user && data.user._id) {
+            localStorage.setItem('userId', data.user._id);
+          }
+          router.push('/dashboard');
+        } catch (err: any) {
+          setError(err.message);
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
   return (
       <div className={cn("flex flex-col gap-6", className)} {...props}>
