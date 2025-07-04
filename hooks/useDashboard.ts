@@ -1,130 +1,106 @@
-// hooks/useDashboard.ts
-import { useState, useEffect } from 'react';
-import { User } from 'firebase/auth';
-import { doc, getDoc, setDoc, collection, query, getDocs } from 'firebase/firestore';
-import { app, db, auth } from "@/lib/firebase.browser";
-import { UserData, Book } from '@/types';
+// src/hooks/useDashboard.ts
+import { useState, useEffect, useCallback } from 'react';
+import { UserData, Book, NameEntryData } from '@/types'; // Import Book and NameEntryData types
 
-export const useDashboard = (currentUser: User | null) => {
+interface UseDashboardProps {
+  uid: string | null; // The user's unique ID (MongoDB _id)
+}
+
+export const useDashboard = ({ uid }: UseDashboardProps) => {
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [allBooks, setAllBooks] = useState<Book[]>([]);
+  const [allBooks, setAllBooks] = useState<Book[]>([]); // State to hold all books
+  const [booksRead, setBooksRead] = useState<Book[]>([]); // State for finished books
+  const [currentlyReading, setCurrentlyReading] = useState<Book[]>([]); // State for reading books
+  const [wantToRead, setWantToRead] = useState<Book[]>([]); // State for want to read books
   const [isLoading, setIsLoading] = useState(true);
   const [showNameEntry, setShowNameEntry] = useState(false);
 
-  // Fetch books by status
-  const fetchBooksByStatus = async (userId: string, status: string): Promise<Book[]> => {
-    try {
-      const booksRef = collection(db, "users", userId, "books");
-      const q = query(booksRef);
-      const snapshot = await getDocs(q);
-      const books: Book[] = [];
-      
-      snapshot.forEach(docSnap => {
-        const bookData = docSnap.data() as Book;
-        if (bookData.status === status) {
-          books.push({ ...bookData, id: docSnap.id });
-        }
-      });
-      
-      return books;
-    } catch (error) {
-      console.error(`Error fetching ${status} books:`, error);
-      return [];
+  // Function to fetch all necessary dashboard data (user profile and books)
+  const fetchDashboardData = useCallback(async () => {
+    if (!uid) {
+      setIsLoading(false);
+      return;
     }
-  };
 
-  // Load user data from Firestore
-  const loadUserData = async () => {
-    if (!currentUser) return;
-
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
-      
-      if (userDoc.exists()) {
-        const data = userDoc.data() as UserData;
-        const userName = data.userName || data.userName;
-        
-        if (!userName) {
-          setShowNameEntry(true);
-        } else {
-          // Fetch books by status
-          const [reading, booksRead, wantToRead] = await Promise.all([
-            fetchBooksByStatus(currentUser.uid, "reading"),
-            fetchBooksByStatus(currentUser.uid, "finished"),
-            fetchBooksByStatus(currentUser.uid, "wantToRead")
-          ]);
+      // 1. Fetch User Profile Data
+      const userRes = await fetch(`/api/users/${uid}`);
+      if (!userRes.ok) {
+        throw new Error('Failed to fetch user profile data');
+      }
+      const userData: UserData = await userRes.json();
+      setUserData(userData);
 
-          const updatedUserData: UserData = {
-            ...data,
-            reading,
-            booksRead,
-            wantToRead
-          };
-
-          setUserData(updatedUserData);
-        }
-      } else {
+      // Determine if NameEntryModal should be shown
+      if (!userData.userName || userData.userName.trim() === '') {
         setShowNameEntry(true);
+      } else {
+        setShowNameEntry(false);
       }
 
-      // Fetch all books
-      const q = query(collection(db, "users", currentUser.uid, "books"));
-      const snapshot = await getDocs(q);
-      const books: Book[] = [];
-      snapshot.forEach(docSnap => {
-        books.push({ id: docSnap.id, ...docSnap.data() } as Book);
-      });
-      setAllBooks(books);
+      // 2. Fetch User's Books
+      const booksRes = await fetch(`/api/books?userId=${uid}`);
+      if (!booksRes.ok) {
+        throw new Error('Failed to fetch user books');
+      }
+      const fetchedBooks: Book[] = await booksRes.json();
+      setAllBooks(fetchedBooks); // Store all fetched books
+
+      // 3. Categorize Books
+      setBooksRead(fetchedBooks.filter(book => book.status === 'finished'));
+      setCurrentlyReading(fetchedBooks.filter(book => book.status === 'reading'));
+      setWantToRead(fetchedBooks.filter(book => book.status === 'wantToRead'));
 
     } catch (error) {
-      console.error('Error loading user data:', error);
-      setShowNameEntry(true);
+      console.error('Error fetching dashboard data:', error);
+      // Handle error gracefully, e.g., show a message to the user
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [uid]);
 
-  // Handle name submission
-  const handleNameSubmission = async (data: { fullName: string; userName: string; readingGoal: number }) => {
-    if (!currentUser) return;
+  // Effect hook to call fetchDashboardData when the component mounts or uid changes
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
+
+  // Function to handle the submission from the NameEntryModal
+  const handleNameSubmission = async (data: NameEntryData) => {
+    if (!uid) {
+      console.error('User ID not available for name submission.');
+      throw new Error('User not authenticated.');
+    }
 
     try {
-      const userRef = doc(db, 'users', currentUser.uid);
-      const newUserData: UserData = {
-        fullName: data.fullName,
-        userId: currentUser.uid,
-        userName: data.userName,
-        readingGoal: data.readingGoal,
-        dateJoined: new Date().toISOString(),
-        lastActive: new Date().toISOString(),
-        friends: {},
-        reading: [],
-        booksRead: [],
-        wantToRead: []
-      };
+      const res = await fetch(`/api/users/${uid}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
 
-      await setDoc(userRef, newUserData, { merge: true });
-      setUserData(newUserData);
-      setShowNameEntry(false);
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to update user profile');
+      }
+
+      // After successful update, refetch all dashboard data
+      await fetchDashboardData();
     } catch (error) {
-      console.error('Error saving user data:', error);
+      console.error('Error submitting name entry:', error);
       throw error;
     }
   };
 
-  useEffect(() => {
-    if (currentUser) { // is email verified later
-      loadUserData();
-    }
-  }, [currentUser]);
-
   return {
     userData,
-    allBooks,
+    allBooks, // Can be useful if you need all books for other purposes
+    booksRead,
+    currentlyReading,
+    wantToRead,
     isLoading,
     showNameEntry,
     handleNameSubmission,
-    refetchUserData: loadUserData
+    refetchDashboardData: fetchDashboardData, // Expose for manual refresh
   };
 };

@@ -37,7 +37,8 @@ const NameEntryModal: React.FC<NameEntryModalProps> = ({ isVisible, onSubmit }) 
       // Optionally clear form or show success
     } catch (error) {
       console.error('Error submitting name entry:', error);
-      alert('Sorry, there was an error setting up your profile. Please try again.');
+      // IMPORTANT: Replaced alert() with console.error for better practice in iframes
+      // alert('Sorry, there was an error setting up your profile. Please try again.');
     } finally {
       setIsLoading(false);
     }

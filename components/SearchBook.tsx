@@ -1,8 +1,8 @@
 'use client';
 import React, { useState } from "react";
-import { db, auth } from "@/lib/firebase.browser";
-import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
-import { onAuthStateChanged, User } from "firebase/auth";
+// Removed Firebase imports: import { db, auth } from "@/lib/firebase.browser";
+// Removed Firebase imports: import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
+// Removed Firebase imports: import { onAuthStateChanged, User } from "firebase/auth";
 
 interface BookResult {
   key: string;
@@ -33,15 +33,8 @@ const SearchBook: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [noResults, setNoResults] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-
-  // Listen for auth state
-  React.useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
-      setCurrentUser(user);
-    });
-    return () => unsub();
-  }, []);
+  // Get userId from localStorage, assuming it's stored there after login
+  const userId = typeof window !== "undefined" ? localStorage.getItem('userId') : null;
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -74,45 +67,51 @@ const SearchBook: React.FC = () => {
     }
   };
 
-  // Save book to Firestore, checking for duplicates
-  const saveBookToFirestore = async (book: BookResult) => {
-    if (!currentUser) {
+  // Save book to MongoDB via Next.js API route
+  const saveBookToMongoDB = async (book: BookResult) => {
+    if (!userId) {
       setSuccessMsg("Please log in to save books.");
       return;
     }
+    
+    // Prepare book data for the API
     const isbn = book.isbn?.[0] || "Not available";
-    const booksRef = collection(db, "users", currentUser.uid, "books");
-    let exists = false;
-
-    // Check for duplicate by ISBN or title
-    const q = isbn !== "Not available"
-      ? query(booksRef, where("isbn", "==", isbn))
-      : query(booksRef, where("title", "==", book.title));
-    const querySnapshot = await getDocs(q);
-    exists = !querySnapshot.empty;
-
-    if (exists) {
-      setSuccessMsg("This book is already in your library.");
-      return;
-    }
-
-    // Compose book data
-    const cover_url = getCoverUrl(book);
     const bookData = {
+      userId: userId, // Pass the user's MongoDB _id
       title: book.title,
       author: book.author_name?.[0] || "Unknown",
       first_publish_year: book.first_publish_year || "Unknown",
       isbn,
-      cover_url,
+      cover_url: getCoverUrl(book),
       publisher: book.publisher?.[0] || "Unknown",
       pages: book.number_of_pages_median || "Unknown",
       language: book.language?.[0] || "Unknown",
-      dateAdded: new Date().toISOString(),
-      status: "wantToRead",
+      status: "wantToRead", // Default status when saving from search
     };
 
-    await addDoc(booksRef, bookData);
-    setSuccessMsg("Book added successfully!");
+    try {
+      const res = await fetch('/api/books', { // Call your new API route
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        // Handle specific error messages from the API
+        if (res.status === 409) { // Conflict for duplicates
+          setSuccessMsg(data.message || "This book is already in your library.");
+        } else {
+          throw new Error(data.error || 'Failed to save book.');
+        }
+      } else {
+        setSuccessMsg("Book added successfully!");
+      }
+    } catch (err: any) {
+      console.error('Error saving book:', err);
+      setSuccessMsg(err.message || "Failed to save book. Please try again.");
+    }
   };
 
   // Success message timeout
@@ -198,7 +197,7 @@ const SearchBook: React.FC = () => {
                   className="save-button text-white px-6 py-2 rounded-lg font-medium hover:shadow-lg transition-all"
                   onClick={async event => {
                     event.stopPropagation();
-                    await saveBookToFirestore(book);
+                    await saveBookToMongoDB(book); // Call the new function
                   }}
                 >
                   Save Book

@@ -1,7 +1,5 @@
 'use client'
 
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
-import { app, auth } from "@/lib/firebase.browser";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -57,10 +55,10 @@ export function LoginForm({ type, className, ...props }: LoginFormProps) {
           throw new Error(data.message || 'Authentication failed');
         }
 
-        // Safe check
-          if (data.user && data.user._id) {
-            localStorage.setItem('userId', data.user._id);
-          }
+          // Store user ID in localStorage for dashboard access
+          localStorage.setItem('userId', String(data.user._id));
+          localStorage.setItem('userEmail', data.user.email);
+          
           router.push('/dashboard');
         } catch (err: any) {
           setError(err.message);

@@ -8,7 +8,6 @@ import { auth, db } from "@/lib/firebase.browser";
 import { Book } from "@/types";
 import BookEditModal from "@/components/BookEditModal";
 import MyBooksTabs from "@/components/MyBooksTabs";
-// import BookEditModal from "@/components/BookEditModal"; // You can implement this modal as needed
 
 const MyBooksPage: React.FC = () => {
   const router = useRouter();

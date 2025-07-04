@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import HeroSection from '@/components/HeroSection';
 import StatsSection from '@/components/StatsSection';
@@ -9,37 +9,30 @@ import CurrentlyReadingSection from '@/components/CurrentlyReadingSection';
 import ReadingGoalSection from '@/components/ReadingGoalSection';
 import NameEntryModal from '@/components/NameEntryModal';
 import BookEditModal from '@/components/BookEditModal';
-import { Book } from '@/types';
+import { useDashboard } from '@/hooks/useDashboard';
+import { Book } from '@/types'; // Ensure Book type is imported
 
 const Dashboard: React.FC = () => {
   const router = useRouter();
-  const [userData, setUserData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [showReadingModal, setShowReadingModal] = useState(false);
-  const [selectedBook, setSelectedBook] = useState<any>(null);
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null); // Type selectedBook as Book
 
-  // Replace with your auth logic to get userId
-  const userId = typeof window !== "undefined" ? localStorage.getItem('userId') : null;
-    
-  useEffect(() => {
-    if (!userId) {
-      router.push('/sign-in');
-      return;
-    }
-    const fetchUserData = async () => {
-      setIsLoading(true);
-      const res = await fetch(`/api/dashboard/user/${userId}`);
-      if (res.ok) {
-        const data = await res.json();
-        setUserData(data.user);
-      }
-      setIsLoading(false);
-    };
-    fetchUserData();
-  }, [userId, router]);
+  const currentUser = {
+    uid: typeof window !== "undefined" ? localStorage.getItem('userId') : null
+  };
 
+  const {
+    userData,
+    booksRead, // New: Get categorized books
+    currentlyReading, // New: Get categorized books
+    wantToRead, // New: Get categorized books
+    isLoading,
+    showNameEntry,
+    handleNameSubmission,
+    refetchDashboardData, // Updated name for refetch function
+  } = useDashboard(currentUser);
 
-  const handleOpenReadingModal = (book: any) => {
+  const handleOpenReadingModal = (book: Book) => { // Type book as Book
     setSelectedBook(book);
     setShowReadingModal(true);
   };
@@ -49,22 +42,38 @@ const Dashboard: React.FC = () => {
     setShowReadingModal(false);
   };
 
-  // Save progress update
+  // Save progress update for a book
   const handleSaveProgress = async (updated: Partial<Book>) => {
-    if (!selectedBook) return;
-    await fetch(`/api/dashboard/book/${selectedBook._id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updated),
-    });
-    // Refetch user data
-    const res = await fetch(`/api/dashboard/user/${userId}`);
-    if (res.ok) {
-      const data = await res.json();
-      setUserData(data.user);
+    if (!selectedBook || !currentUser.uid) {
+      console.error('No book selected or user not authenticated for progress update.');
+      return;
     }
-    handleCloseReadingModal();
+    
+    try {
+      // Assuming you have an API route for updating a single book by its _id
+      const response = await fetch(`/api/books/${selectedBook._id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update book');
+      }
+
+      // Refetch all dashboard data to update statistics and book lists
+      await refetchDashboardData();
+      handleCloseReadingModal();
+    } catch (error) {
+      console.error('Error updating book:', error);
+      // Implement a user-friendly message (e.g., a toast notification)
+    }
   };
+
+  if (!currentUser.uid) {
+    router.push('/sign-in');
+    return null;
+  }
 
   if (isLoading) {
     return (
@@ -74,16 +83,9 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  // Uncomment and implement the following if you want to use the NameEntryModal:
-  // const [showNameEntry, setShowNameEntry] = useState(false);
-  // const handleNameSubmission = (name: string) => {
-  //   // handle name submission logic here
-  //   setShowNameEntry(false);
-  // };
-
-  // if (showNameEntry) {
-  //   return <NameEntryModal isVisible={showNameEntry} onSubmit={handleNameSubmission} />;
-  // }
+  if (showNameEntry) {
+    return <NameEntryModal isVisible={showNameEntry} onSubmit={handleNameSubmission} />;
+  }
 
   return (
     <div className="min-h-screen">
@@ -91,8 +93,8 @@ const Dashboard: React.FC = () => {
         <HeroSection 
           userName={userData?.userName} 
           onContinueReading={() => {
-            const currentBooks = userData?.reading || [];
-            if (currentBooks.length > 0) {
+            // Use currentlyReading from the hook
+            if (currentlyReading.length > 0) {
               document.querySelector('.glass-card')?.scrollIntoView({ behavior: 'smooth' });
             } else {
               router.push('/my-books');
@@ -101,7 +103,12 @@ const Dashboard: React.FC = () => {
           onAddNewBook={() => router.push('/add-books')}
         />
 
-        <StatsSection userData={userData ?? undefined} />
+        {/* Pass categorized book arrays to StatsSection */}
+        <StatsSection 
+          booksRead={booksRead} 
+          currentlyReading={currentlyReading} 
+          wantToRead={wantToRead} 
+        />
         
         <QuickActionsSection 
           onAddBook={() => router.push('/add-books')}
@@ -109,8 +116,9 @@ const Dashboard: React.FC = () => {
           onRecommendations={() => router.push('/recommendations')}
         />
 
+        {/* Pass currentlyReading books to CurrentlyReadingSection */}
         <CurrentlyReadingSection 
-          books={userData?.reading || []}
+          books={currentlyReading} // Use currentlyReading from the hook
           onBookClick={handleOpenReadingModal}
         />
 
@@ -123,7 +131,7 @@ const Dashboard: React.FC = () => {
           isOpen={showReadingModal}
           onClose={handleCloseReadingModal}
           book={selectedBook}
-          tab="reading"
+          tab="reading" // This might need adjustment based on your BookEditModal logic
           onSave={handleSaveProgress}
         />
       )}

@@ -1,7 +1,4 @@
 import React, { useState } from 'react';
-import { db, auth } from "@/lib/firebase.browser";
-import { collection, addDoc } from "firebase/firestore";
-import { onAuthStateChanged, User } from "firebase/auth";
 
 const genres = [
   "Fiction", "Non-Fiction", "Mystery", "Romance", "Science Fiction", "Fantasy",
@@ -14,35 +11,53 @@ const ManualBookForm: React.FC = () => {
   const [genre, setGenre] = useState('');
   const [status, setStatus] = useState('');
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-
-  React.useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => setCurrentUser(user));
-    return () => unsub();
-  }, []);
+  const userId = typeof window !== "undefined" ? localStorage.getItem('userId') : null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentUser) {
+    if (!userId) {
       setSuccessMsg("Please log in to save books.");
       return;
     }
-    await addDoc(
-      collection(db, "users", currentUser.uid, "books"),
-      {
-        title,
-        author,
-        genre,
-        cover_url: "https://via.placeholder.com/150?text=No+Cover",
-        dateAdded: new Date().toISOString(),
-        status,
+
+    // Prepare book data for the API
+    const bookData = {
+      userId: userId, // Pass the user's MongoDB _id
+      title,
+      author,
+      genre, // Genre is now directly passed
+      cover_url: "https://via.placeholder.com/150?text=No+Cover", // Placeholder for manual entries
+      status,
+    };
+
+    try {
+      const res = await fetch('/api/books', { // Call your new API route
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        // Handle specific error messages from the API
+        if (res.status === 409) { // Conflict for duplicates
+          setSuccessMsg(data.message || "This book is already in your library.");
+        } else {
+          throw new Error(data.error || 'Failed to save book.');
+        }
+      } else {
+        setSuccessMsg("Book added successfully!");
+        // Clear form fields on success
+        setTitle('');
+        setAuthor('');
+        setGenre('');
+        setStatus('');
       }
-    );
-    setSuccessMsg("Book added successfully!");
-    setTitle('');
-    setAuthor('');
-    setGenre('');
-    setStatus('');
+    } catch (err: any) {
+      console.error('Error saving book:', err);
+      setSuccessMsg(err.message || "Failed to save book. Please try again.");
+    }
   };
 
   React.useEffect(() => {

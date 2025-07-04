@@ -5,7 +5,8 @@ export interface User {
 }
 
 export interface Book {
-  id: string;
+  _id: string; // MongoDB's default ID
+  userId: string; // Stored as a string on the frontend, but ObjectId in backend
   title: string;
   author: string;
   status: 'wantToRead' | 'reading' | 'finished';
@@ -30,16 +31,14 @@ export interface BookEditModalProps {
 }
 
 export interface UserData {
-  userId: string;
-  fullName: string;
-  userName: string;
-  readingGoal: number;
-  dateJoined: string;
-  lastActive: string;
-  friends: Record<string, any>;
-  reading?: Book[];
-  booksRead?: Book[];
-  wantToRead?: Book[];
+  _id: string;
+  email: string;
+  fullName?: string;
+  userName?: string;
+  readingGoal?: number;
+  dateJoined?: string;
+  lastActive?: string;
+  friends?: Record<string, any>;
 }
 
 export interface ReadingProgress {
