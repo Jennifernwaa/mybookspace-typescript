@@ -1,41 +1,45 @@
-// models/Book.ts
 import mongoose, { Schema, Document } from 'mongoose';
 
-export interface Book extends Document {
-  userId: mongoose.Types.ObjectId; // Reference to the User who owns this book
+export interface IBook extends Document {
+  userId: mongoose.Types.ObjectId;
   title: string;
   author: string;
   status: 'reading' | 'finished' | 'wantToRead';
   progress?: number;
+  totalPages?: number;
   isbn?: string;
   description?: string;
   genre?: string[];
   first_publish_year?: number;
   cover_url?: string;
   publisher?: string;
-
   favorite?: boolean;
   notes?: string;
   rating?: number;
-
-  dateAdded: string; // ISO string format
+  review?: string;
+  dateAdded: string;
   startDate?: string;
   endDate?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 const BookSchema: Schema = new Schema({
   userId: {
-    type: Schema.Types.ObjectId, // This links the book to a specific user
-    ref: 'User', // References the 'User' model
+    type: Schema.Types.ObjectId,
+    ref: 'User',
     required: true,
+    index: true
   },
   title: {
     type: String,
-    required: true
+    required: true,
+    trim: true
   },
   author: {
     type: String,
-    required: true
+    required: true,
+    trim: true
   },
   status: {
     type: String,
@@ -45,73 +49,95 @@ const BookSchema: Schema = new Schema({
   },
   progress: {
     type: Number,
-    default: 0
+    default: 0,
+    min: 0
   },
-  totalPages: { // Added from your provided schema
+  totalPages: {
     type: Number,
-    default: 0
+    default: 0,
+    min: 0
   },
   isbn: {
     type: String,
-    sparse: true // Added sparse index
+    sparse: true,
+    trim: true
   },
   cover_url: {
-    type: String
+    type: String,
+    trim: true
   },
-  description: { // Added from your provided interface/schema
-    type: String
+  description: {
+    type: String,
+    trim: true
   },
-  genre: { // Added from your provided interface/schema
+  genre: {
     type: [String],
     default: []
   },
-  first_publish_year: { // Updated to match your provided schema
+  first_publish_year: {
     type: Number,
-    required: false,
+    min: 0
   },
-  publisher: { // Updated to match your provided schema
+  publisher: {
     type: String,
-    required: false,
+    trim: true
   },
-  favorite: { // Added from your provided interface
+  favorite: {
     type: Boolean,
     default: false
   },
-  notes: { // Added from your provided interface
-    type: String
+  notes: {
+    type: String,
+    trim: true
   },
-  rating: { // Added from your provided interface/schema
+  rating: {
     type: Number,
     min: 1,
     max: 5
   },
-  review: { // Added from your provided schema
-    type: String
+  review: {
+    type: String,
+    trim: true
   },
-  dateAdded: { // Updated to match your provided schema
+  dateAdded: {
     type: String,
     default: () => new Date().toISOString()
   },
-  startDate: { // Added from your provided interface/schema
+  startDate: {
     type: String
   },
-  endDate: { // Added from your provided interface/schema
+  endDate: {
     type: String
   },
-  createdAt: { // Manually handled timestamps as per your provided schema
+  createdAt: {
     type: String,
     default: () => new Date().toISOString()
   },
-  updatedAt: { // Manually handled timestamps as per your provided schema
+  updatedAt: {
     type: String,
     default: () => new Date().toISOString()
   }
 }, {
-  timestamps: false, // Set to false as you're handling timestamps manually
+  timestamps: true 
 });
 
-// Index for efficient queries
+// Compound indexes for efficient queries
 BookSchema.index({ userId: 1, status: 1 });
 BookSchema.index({ userId: 1, updatedAt: -1 });
+BookSchema.index({ userId: 1, favorite: 1 });
 
-export default mongoose.models.Book || mongoose.model<Book>('Book', BookSchema);
+// Pre-save middleware to update the updatedAt field
+BookSchema.pre('save', function(next) {
+  this.updatedAt = new Date().toISOString();
+  next();
+});
+
+// Pre-update middleware to update the updatedAt field
+BookSchema.pre(['findOneAndUpdate', 'updateOne', 'updateMany'], function(next) {
+  this.set({ updatedAt: new Date().toISOString() });
+  next();
+});
+
+const Book = mongoose.models.Book || mongoose.model<IBook>('Book', BookSchema);
+
+export default Book;

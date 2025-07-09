@@ -78,7 +78,7 @@ const CurrentlyReadingSection: React.FC<CurrentlyReadingSectionProps> = ({
             
             return (
               <div 
-                key={book.id}
+                key={book._id}
                 className="book-preview-card rounded-2xl p-6 group cursor-pointer" 
                 onClick={() => onBookClick(book)}
               >

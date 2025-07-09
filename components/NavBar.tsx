@@ -1,26 +1,48 @@
 'use client'
 import React, { useState, useRef, useEffect } from 'react'
-import { auth } from "@/lib/firebase.browser";
-import { navbarLinks } from '@/constants'
+// Removed Firebase imports
+// import { auth } from "@/lib/firebase.browser";
+// import { signOut} from "firebase/auth";
+
+// FIX: Import NavbarLink type from constants
+import { navbarLinks, NavbarLink } from '@/constants' 
 import { cn } from '@/lib/utils'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
-import { signOut} from "firebase/auth";
 
 const NavBar = () => {
   const pathname = usePathname();
   const router = useRouter();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
+
+  // FIX: Updated handleLogout to use a Next.js API route
   const handleLogout = async () => {
     try {
-      await signOut(auth);
-      router.push('/sign-in'); // Redirect to sign-in after logout
+      // Call your logout API route
+      const res = await fetch('/api/auth/logout', {
+        method: 'POST', // Or DELETE, depending on your API design
+        headers: {
+          'Content-Type': 'application/json',
+          // If your logout API requires a token, include it here
+          // 'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to log out.');
+      }
+
+      // Clear userId from localStorage after successful logout
+      localStorage.removeItem('userId'); 
+      // Redirect to sign-in after logout
+      router.push('/sign-in'); 
     } catch (error) {
       console.error('Logout error:', error);
-      alert('Error logging out. Please try again.');
+      // Consider using a more user-friendly notification system instead of alert
+      alert('Error logging out. Please try again.'); 
     }
   };
 
@@ -41,7 +63,7 @@ const NavBar = () => {
         <div className="container mx-auto flex justify-between items-center py-4">
           <div className="text-2xl font-bold font-serif brown-text">myBookSpace</div>
           <div className="space-x-4 flex items-center">
-            {navbarLinks.map((item, idx) => {
+            {navbarLinks.map((item: NavbarLink, idx) => { // Use NavbarLink type here
               if (item.type === "icon") {
                 return (
                   <div key={item.label} className="relative" ref={dropdownRef}>
@@ -51,7 +73,7 @@ const NavBar = () => {
                       aria-label={item.label}
                     >
                       <Image
-                        src={item.imgURL}
+                        src={item.imgURL} // item.imgURL is guaranteed to exist here
                         alt={item.label}
                         width={32}
                         height={32}
@@ -80,10 +102,11 @@ const NavBar = () => {
                   </div>
                 );
               }
+              // FIX: TypeScript now knows item.route is a string in this 'else' branch
               const isActive = pathname === item.route || pathname.startsWith(`${item.route}/`);
               return (
                 <Link
-                  href={item.route}
+                  href={item.route} // item.route is guaranteed to be string here
                   key={item.label}
                   className={cn(
                     "navbar-link brown-text hover:space-red-text hover:underline underline-offset-4 decoration-space-red font-semibold transition-colors",
@@ -100,5 +123,4 @@ const NavBar = () => {
     </section>
   )
 }
-
 export default NavBar

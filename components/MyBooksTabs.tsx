@@ -1,21 +1,24 @@
 import React from "react";
 import { Book } from "@/types";
 import BookCard from "./BookCard";
+import { TabType } from "@/constants";
 
 interface MyBooksTabsProps {
   books: Book[];
   onEdit: (book: Book) => void;
   onDelete: (book: Book) => void;
   onToggleFavorite: (book: Book) => void;
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
+  activeTab: TabType;
+  setActiveTab: (tab: TabType) => void;
 }
 
-const tabLabels = [
+
+const tabLabels: Array<{ key: TabType; label: string; icon: string }> = [
   { key: "wantToRead", label: "Want to Read", icon: "📖" },
   { key: "reading", label: "Currently Reading", icon: "📚" },
   { key: "finished", label: "Finished", icon: "✅" },
 ];
+
 
 const MyBooksTabs: React.FC<MyBooksTabsProps> = ({
   books,
@@ -66,7 +69,7 @@ const MyBooksTabs: React.FC<MyBooksTabsProps> = ({
         {filteredBooks.length ? (
           filteredBooks.map((book) => (
             <BookCard
-              key={book.id}
+              key={book._id}
               book={book}
               tab={activeTab as any}
               onEdit={onEdit}
