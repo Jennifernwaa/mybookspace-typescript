@@ -17,6 +17,7 @@
     "cookie": "^1.0.2",
     "firebase": "^11.9.1",
     "firebase-admin": "^13.4.0",
+    "gsap": "^3.13.0",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.522.0",
     "mongodb": "^6.17.0",

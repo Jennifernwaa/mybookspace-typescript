@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useDashboard } from '@/hooks/useDashboard';
 
 const genres = [
   "Fiction", "Non-Fiction", "Mystery", "Romance", "Science Fiction", "Fantasy",
@@ -6,23 +7,23 @@ const genres = [
 ];
 
 const ManualBookForm: React.FC = () => {
+  const { userData, refetchDashboardData, isLoading } = useDashboard();
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [genre, setGenre] = useState('');
   const [status, setStatus] = useState('');
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const userId = typeof window !== "undefined" ? localStorage.getItem('userId') : null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!userId) {
-      setSuccessMsg("Please log in to save books.");
+
+    if (!userData?._id) {
+      setSuccessMsg("User not found. Please sign in again.");
       return;
     }
-
     // Prepare book data for the API
     const bookData = {
-      userId: userId, // Pass the user's MongoDB _id
+      userId: userData._id, // Pass the user's MongoDB _id
       title,
       author,
       genre, // Genre is now directly passed

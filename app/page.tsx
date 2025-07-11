@@ -5,6 +5,7 @@ import LandingBar from "@/components/LandingBar";
 import About from "@/components/About";
 import Contact from "@/components/Contact";
 import './globals.css';
+import ScrollFloat from "@/components/ScrollFloat";
 
 export default function Home() {
   const starsRef = useRef<HTMLDivElement>(null);
@@ -142,6 +143,16 @@ export default function Home() {
                   </div>
               </div>
           </section>
+
+          <ScrollFloat
+            animationDuration={1}
+            ease='back.inOut(2)'
+            scrollStart='center bottom+=50%'
+            scrollEnd='bottom bottom-=40%'
+            stagger={0.03}
+          >
+            myBookSpace
+          </ScrollFloat>
 
           {/* About Section */}
           <section id="about" className="py-20 bg-white">

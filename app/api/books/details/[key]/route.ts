@@ -94,7 +94,7 @@ export async function GET(
 
   const { userId } = authResult;
   // FIX: Access params and cast bookId to string
-  const bookId = context.params.bookId as string; 
+  const { bookId } = await context.params; 
 
   // Get book with authorization
   const bookResult = await getBookWithAuth(bookId, userId);
@@ -134,7 +134,7 @@ export async function PUT(
 
   const { userId } = authResult;
   // FIX: Access params and cast bookId to string
-  const bookId = context.params.bookId as string; 
+  const { bookId } = await context.params; 
 
   // Get book with authorization (ensures user owns the book before updating)
   const bookResult = await getBookWithAuth(bookId, userId);
@@ -216,7 +216,7 @@ export async function DELETE(
 
   const { userId } = authResult;
   // FIX: Access params and cast bookId to string
-  const bookId = context.params.bookId as string; 
+  const { bookId } = await context.params; 
 
   // Get book with authorization (ensures user owns the book before deleting)
   const bookResult = await getBookWithAuth(bookId, userId);

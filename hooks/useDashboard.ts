@@ -1,21 +1,16 @@
-// src/hooks/useDashboard.ts
+'use client';
+
 import { useState, useEffect, useCallback } from 'react';
-import { UserData, Book, NameEntryData } from '@/types'; // Import Book and NameEntryData types
+import { UserData, Book, NameEntryData } from '@/types';
 
-interface UseDashboardProps {
-  uid: string | null; // The user's unique ID (MongoDB _id)
-}
-
-export const useDashboard = ({ uid }: UseDashboardProps) => {
+export const useDashboard = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [allBooks, setAllBooks] = useState<Book[]>([]); // State to hold all books
-  const [booksRead, setBooksRead] = useState<Book[]>([]); // State for finished books
-  const [currentlyReading, setCurrentlyReading] = useState<Book[]>([]); // State for reading books
-  const [wantToRead, setWantToRead] = useState<Book[]>([]); // State for want to read books
+  const [allBooks, setAllBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showNameEntry, setShowNameEntry] = useState(false);
 
-  // Function to fetch all necessary dashboard data (user profile and books)
+  const uid = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
+
   const fetchDashboardData = useCallback(async () => {
     if (!uid) {
       setIsLoading(false);
@@ -24,53 +19,34 @@ export const useDashboard = ({ uid }: UseDashboardProps) => {
 
     setIsLoading(true);
     try {
-      // 1. Fetch User Profile Data
       const userRes = await fetch(`/api/users/${uid}`);
-      if (!userRes.ok) {
-        throw new Error('Failed to fetch user profile data');
-      }
+      if (!userRes.ok) throw new Error('Failed to fetch user profile data');
+
       const userData: UserData = await userRes.json();
       setUserData(userData);
 
-      // Determine if NameEntryModal should be shown
-      if (!userData.userName || userData.userName.trim() === '') {
-        setShowNameEntry(true);
-      } else {
-        setShowNameEntry(false);
-      }
+      setShowNameEntry(!userData.userName || userData.userName.trim() === '');
 
-      // 2. Fetch User's Books
       const booksRes = await fetch(`/api/books?userId=${uid}`);
-      if (!booksRes.ok) {
-        throw new Error('Failed to fetch user books');
-      }
-      const fetchedBooks: Book[] = await booksRes.json();
-      setAllBooks(fetchedBooks); // Store all fetched books
+      if (!booksRes.ok) throw new Error('Failed to fetch user books');
 
-      // 3. Categorize Books
-      setBooksRead(fetchedBooks.filter(book => book.status === 'finished'));
-      setCurrentlyReading(fetchedBooks.filter(book => book.status === 'reading'));
-      setWantToRead(fetchedBooks.filter(book => book.status === 'wantToRead'));
+      const fetchedBooksResponse = await booksRes.json();
+      if (!Array.isArray(fetchedBooksResponse.books)) throw new Error('Books API did not return an array.');
 
+      setAllBooks(fetchedBooksResponse.books);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
-      // Handle error gracefully, e.g., show a message to the user
     } finally {
       setIsLoading(false);
     }
   }, [uid]);
 
-  // Effect hook to call fetchDashboardData when the component mounts or uid changes
   useEffect(() => {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
-  // Function to handle the submission from the NameEntryModal
   const handleNameSubmission = async (data: NameEntryData) => {
-    if (!uid) {
-      console.error('User ID not available for name submission.');
-      throw new Error('User not authenticated.');
-    }
+    if (!uid) throw new Error('User not authenticated.');
 
     try {
       const res = await fetch(`/api/users/${uid}`, {
@@ -84,7 +60,6 @@ export const useDashboard = ({ uid }: UseDashboardProps) => {
         throw new Error(errorData.error || 'Failed to update user profile');
       }
 
-      // After successful update, refetch all dashboard data
       await fetchDashboardData();
     } catch (error) {
       console.error('Error submitting name entry:', error);
@@ -92,15 +67,19 @@ export const useDashboard = ({ uid }: UseDashboardProps) => {
     }
   };
 
+  const booksRead = allBooks.filter(book => book.status === 'finished');
+  const currentlyReading = allBooks.filter(book => book.status === 'reading');
+  const wantToRead = allBooks.filter(book => book.status === 'wantToRead');
+
   return {
     userData,
-    allBooks, // Can be useful if you need all books for other purposes
+    allBooks,
     booksRead,
     currentlyReading,
     wantToRead,
     isLoading,
     showNameEntry,
     handleNameSubmission,
-    refetchDashboardData: fetchDashboardData, // Expose for manual refresh
+    refetchDashboardData: fetchDashboardData,
   };
 };

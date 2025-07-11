@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import HeroSection from '@/components/HeroSection';
 import StatsSection from '@/components/StatsSection';
@@ -16,10 +16,7 @@ const Dashboard: React.FC = () => {
   const router = useRouter();
   const [showReadingModal, setShowReadingModal] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null); // Type selectedBook as Book
-
-  const currentUser = {
-    uid: typeof window !== "undefined" ? localStorage.getItem('userId') : null
-  };
+  const [userId, setuserId] = useState<string | null>(null);
 
   const {
     userData,
@@ -30,7 +27,7 @@ const Dashboard: React.FC = () => {
     showNameEntry,
     handleNameSubmission,
     refetchDashboardData, // Updated name for refetch function
-  } = useDashboard(currentUser);
+  } = useDashboard();
 
   const handleOpenReadingModal = (book: Book) => { // Type book as Book
     setSelectedBook(book);
@@ -44,7 +41,7 @@ const Dashboard: React.FC = () => {
 
   // Save progress update for a book
   const handleSaveProgress = async (updated: Partial<Book>) => {
-    if (!selectedBook || !currentUser.uid) {
+    if (!selectedBook ) {
       console.error('No book selected or user not authenticated for progress update.');
       return;
     }
@@ -70,10 +67,6 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  if (!currentUser.uid) {
-    router.push('/sign-in');
-    return null;
-  }
 
   if (isLoading) {
     return (

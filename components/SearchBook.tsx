@@ -1,8 +1,7 @@
 'use client';
 import React, { useState } from "react";
-// Removed Firebase imports: import { db, auth } from "@/lib/firebase.browser";
-// Removed Firebase imports: import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
-// Removed Firebase imports: import { onAuthStateChanged, User } from "firebase/auth";
+import { useDashboard } from '@/hooks/useDashboard';
+
 
 interface BookResult {
   key: string;
@@ -28,13 +27,12 @@ const getCoverUrl = (book: BookResult) => {
 };
 
 const SearchBook: React.FC = () => {
+  const { userData, refetchDashboardData, isLoading } = useDashboard();
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState<BookResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [noResults, setNoResults] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  // Get userId from localStorage, assuming it's stored there after login
-  const userId = typeof window !== "undefined" ? localStorage.getItem('userId') : null;
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -69,15 +67,16 @@ const SearchBook: React.FC = () => {
 
   // Save book to MongoDB via Next.js API route
   const saveBookToMongoDB = async (book: BookResult) => {
-    if (!userId) {
-      setSuccessMsg("Please log in to save books.");
+    
+    if (!userData?._id) {
+      setSuccessMsg("User not found. Please sign in again.");
       return;
     }
     
     // Prepare book data for the API
     const isbn = book.isbn?.[0] || "Not available";
     const bookData = {
-      userId: userId, // Pass the user's MongoDB _id
+      userId: userData._id, // Pass the user's MongoDB _id
       title: book.title,
       author: book.author_name?.[0] || "Unknown",
       first_publish_year: book.first_publish_year || "Unknown",
