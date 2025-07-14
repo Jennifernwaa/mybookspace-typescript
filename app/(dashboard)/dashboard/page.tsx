@@ -47,7 +47,7 @@ const Dashboard: React.FC = () => {
     }
     
     try {
-      // Assuming you have an API route for updating a single book by its _id
+      // API route for updating a single book by its _id
       const response = await fetch(`/api/books/${selectedBook._id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -115,7 +115,10 @@ const Dashboard: React.FC = () => {
           onBookClick={handleOpenReadingModal}
         />
 
-        <ReadingGoalSection userData={userData} />
+        <ReadingGoalSection 
+        userData={userData} 
+         booksRead={booksRead}
+         />
       </main>
 
       {/* BookEditModal for editing reading progress */}

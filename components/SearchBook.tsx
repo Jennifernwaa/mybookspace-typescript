@@ -1,6 +1,8 @@
 'use client';
 import React, { useState } from "react";
 import { useDashboard } from '@/hooks/useDashboard';
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 
 interface BookResult {
@@ -14,19 +16,12 @@ interface BookResult {
   subject?: string[];
   number_of_pages_median?: number;
   language?: string[];
+  description?: string;
+  subjects ?: string[];
 }
 
-const getCoverUrl = (book: BookResult) => {
-  if (book.isbn && book.isbn[0]) {
-    return `https://covers.openlibrary.org/b/isbn/${book.isbn[0]}-M.jpg?default=false`;
-  }
-  if (book.cover_i) {
-    return `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg?default=false`;
-  }
-  return "https://via.placeholder.com/80x120?text=No+Cover";
-};
-
 const SearchBook: React.FC = () => {
+  const router = useRouter();
   const { userData, refetchDashboardData, isLoading } = useDashboard();
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState<BookResult[]>([]);
@@ -63,6 +58,31 @@ const SearchBook: React.FC = () => {
       e.preventDefault();
       handleSearch();
     }
+  };
+
+  const handleBookClick = (book: BookResult) => {
+    const encodedTitle = book.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const encodedAuthor = (book.author_name?.[0] || 'unknown').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const slug = `${encodedTitle}-${encodedAuthor}`;
+    
+    // Store book data in sessionStorage
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('selectedBook', JSON.stringify(book));
+    }
+    console.log(book);
+
+    router.push(`/books/${slug}`);
+  };
+
+
+  const getCoverUrl = (book: BookResult) => {
+    if (book.isbn && book.isbn[0]) {
+      return `https://covers.openlibrary.org/b/isbn/${book.isbn[0]}-M.jpg?default=false`;
+    }
+    if (book.cover_i) {
+      return `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg?default=false`;
+    }
+    return "https://via.placeholder.com/80x120?text=No+Cover";
   };
 
   // Save book to MongoDB via Next.js API route
@@ -164,8 +184,9 @@ const SearchBook: React.FC = () => {
           <div className="space-y-4">
             {results.map(book => (
               <div
-                key={book.key}
                 className="result-card rounded-2xl p-6 flex items-center space-x-4 cursor-pointer hover:shadow-lg transition-all"
+                onClick={() => handleBookClick(book)}
+                key={book.key}
               >
                 <div className="w-16 h-20 bg-gradient-to-br from-peach to-salmon rounded-lg flex items-center justify-center text-white text-2xl shadow-lg overflow-hidden">
                   <img

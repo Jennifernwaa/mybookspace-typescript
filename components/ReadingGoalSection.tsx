@@ -1,15 +1,15 @@
-// components/dashboard/ReadingGoalSection.tsx
 import React from 'react';
-import { UserData } from '@/types';
+import { Book, UserData } from '@/types';
 
 interface ReadingGoalSectionProps {
   userData: UserData | null;
+  booksRead: Book[];
 }
 
-const ReadingGoalSection: React.FC<ReadingGoalSectionProps> = ({ userData }) => {
-  const booksRead = userData?.booksRead?.length || 0;
+const ReadingGoalSection: React.FC<ReadingGoalSectionProps> = ({ userData, booksRead }) => {
+  const totalBooksRead = booksRead.length;
   const readingGoal = userData?.readingGoal || 60;
-  const progress = readingGoal > 0 ? (booksRead / readingGoal) * 100 : 0;
+  const progress = readingGoal > 0 ? (totalBooksRead / readingGoal) * 100 : 0;
   const roundedProgress = Math.round(progress);
 
   const getProgressMessage = () => {
@@ -31,7 +31,7 @@ const ReadingGoalSection: React.FC<ReadingGoalSectionProps> = ({ userData }) => 
           2025 Reading Goal
         </h3>
         <div className="flex items-center justify-center mb-6">
-          <div className="text-5xl font-bold text-space-red">{booksRead}</div>
+          <div className="text-5xl font-bold text-space-red">{totalBooksRead}</div>
           <div className="mx-4 text-2xl text-warm-brown">/</div>
           <div className="text-3xl font-semibold text-warm-brown opacity-75">
             {readingGoal}
