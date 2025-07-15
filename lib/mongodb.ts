@@ -14,7 +14,7 @@ declare global {
   };
 }
 
-// Initialize the cache on the global object
+// Initialize the cache on the global objec
 let cached = global.mongoose || { conn: null, promise: null };
 
 if (!global.mongoose) {

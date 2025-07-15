@@ -8,8 +8,9 @@ export interface User extends Document {
   readingGoal: number;
   dateJoined: string;
   lastActive: string;
-  friends: Record<string, any>;
+  friends: string[];
   createdAt: string;
+
 }
 
 const UserSchema: Schema = new Schema({
@@ -45,10 +46,10 @@ const UserSchema: Schema = new Schema({
     type: String,
     required: false
   },
-  friends: {
-    type: Schema.Types.Mixed,
-    default: {}
-  },
+  friends: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  }],
   createdAt: {
     type: String,
     default: () => new Date().toISOString()
@@ -56,5 +57,10 @@ const UserSchema: Schema = new Schema({
 }, {
   timestamps: true,
 });
+
+// Index for faster queries
+UserSchema.index({ email: 1 });
+UserSchema.index({ userName: 1 });
+UserSchema.index({ friends: 1 });
 
 export default mongoose.models.User || mongoose.model<User>('User', UserSchema);
