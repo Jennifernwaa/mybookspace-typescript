@@ -1,4 +1,3 @@
-// app/api/books/[bookId]/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import connectToDB from '@/lib/mongodb';
 import Book from '@/models/Book';
@@ -7,7 +6,7 @@ import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
-// 🔐 Authenticates the user using JWT stored in cookies
+// Authenticates the user using JWT stored in cookies
 async function authenticateUser(request: NextRequest): Promise<
   { error: string; status: number } | { userId: string }
 > {
