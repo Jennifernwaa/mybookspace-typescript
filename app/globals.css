@@ -134,6 +134,11 @@ html {
     background-color: var(--space-red);
 }
 
+.profile-avatar {
+    background: linear-gradient(135deg, #CB7666 0%, #A93D49 100%);
+    border: 6px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 15px 35px rgba(57, 19, 6, 0.2);
+}
 .hero-section-bg  {
     background: linear-gradient(135deg, 
         rgba(247, 245, 240, 0.95) 0%, 

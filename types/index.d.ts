@@ -1,7 +1,7 @@
 export interface User {
   _id?: string;
   email: string;
-  password?: string; // Add this
+  password?: string; 
   userName?: string;
   fullName?: string;
   readingGoal?: number;
@@ -10,6 +10,14 @@ export interface User {
   friends: string[]; // Okay for frontend; backend uses ObjectId[]
   createdAt?: string;
   updatedAt?: string;
+
+  bio?: string;
+  favoriteGenre?: string;
+  readingGoal?: number;
+  favoriteAuthor?: string;
+  publicReadingList?: boolean;
+  showProgress?: boolean;
+  friendRecs?: boolean;
 }
 
 

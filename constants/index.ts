@@ -20,6 +20,10 @@ export const navbarLinks: NavbarLink[] = [
     label: "Dashboard",
   },
   {
+    route: "/discover",
+    label: "Discover",
+  },
+  {
     route: "/my-books",
     label: "My Books",
   },
@@ -30,6 +34,12 @@ export const navbarLinks: NavbarLink[] = [
   {
     route: "/recommendations",
     label: "Recommendations",
+  },
+  {
+    type: "icon",
+    imgURL: "notification.svg",
+    label: "Notifications",
+    route: undefined, // Explicitly undefined for this type
   },
   {
     type: "icon",
