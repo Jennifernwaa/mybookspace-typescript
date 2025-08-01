@@ -1,17 +1,16 @@
 export type TabType = 'wantToRead' | 'reading' | 'finished';
 export type ModalType = 'wantToRead-modal' | 'reading-modal' | 'finished-modal';
 
-// Define a discriminated union type for NavbarLink
 export type NavbarLink = {
   route: string;
   label: string;
-  type?: never; // Ensures 'type' is not present for regular links
-  imgURL?: never; // Ensures 'imgURL' is not present for regular links
+  type?: never;
+  imgURL?: never;
 } | {
-  type: "icon";
+  type: "settings" | "notifications"; // Different type for each icons
   imgURL: string;
   label: string;
-  route?: undefined; // Explicitly undefined for icon links
+  route?: undefined;
 };
 
 export const navbarLinks: NavbarLink[] = [
@@ -36,15 +35,13 @@ export const navbarLinks: NavbarLink[] = [
     label: "Recommendations",
   },
   {
-    type: "icon",
+    type: "notifications",
     imgURL: "notification.svg",
     label: "Notifications",
-    route: undefined, // Explicitly undefined for this type
   },
   {
-    type: "icon",
+    type: "settings",
     imgURL: "/images/icons8-setting-30.png",
     label: "Settings",
-    route: undefined, // Explicitly undefined for this type
   }
 ];

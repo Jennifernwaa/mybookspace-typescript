@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useEffect, useState } from 'react';
 import { useUser } from './useUser';
-import { useBooks } from './useBooks';
-import { User, Book, ApiResponse } from '@/types'; // Assuming ApiResponse and UserStats are defined
+import { User, Book, ApiResponse } from '@/types';
 import { useParams } from 'next/navigation';
 
 export const useProfile = () => {
@@ -21,7 +20,7 @@ export const useProfile = () => {
     userData,
     isLoading: userLoading,
     error: userError,
-    updateUser,
+    updateUser, // use this function to update the user
     refetchUser
   } = useUser(targetUserId);
 
@@ -43,8 +42,6 @@ export const useProfile = () => {
       const statsData = await statsRes.json();
       const favoriteBooksData: ApiResponse<Book[]> = await favoriteBooksRes.json();
 
-      // Check for success property from both API calls
-      // The stats API you provided doesn't have a 'success' key, so we'll check its data structure
       if (statsData.totalBooksRead !== undefined && favoriteBooksData.success) {
         setStats({
           totalBooksRead: statsData.totalBooksRead,
@@ -72,20 +69,6 @@ export const useProfile = () => {
   
   const friendsCount = useMemo(() => stats?.friendsCount || 0, [stats]);
 
-  const updateProfile = useCallback(async (updates: Partial<User>) => {
-    if (!userData?._id) throw new Error('No user ID');
-    const res = await fetch(`/api/users/${userData._id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(updates),
-    });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || 'Failed to update profile');
-    }
-  }, [userData]);
-
   const isLoading = userLoading || isStatsLoading;
   const error = userError || statsError;
 
@@ -93,6 +76,7 @@ export const useProfile = () => {
     refetchUser();
     fetchProfileData();
   }, [refetchUser, fetchProfileData]);
+
 
   return {
     userData,
@@ -102,7 +86,7 @@ export const useProfile = () => {
     isOwnProfile,
     readingStats,
     friendsCount,
-    updateProfile,
+    updateProfile: updateUser, // Use the updateUser from useUser directly
     refetchProfile,
   };
 };

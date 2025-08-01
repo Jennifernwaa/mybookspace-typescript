@@ -28,7 +28,7 @@ const ReadingGoalSection: React.FC<ReadingGoalSectionProps> = ({ userData, books
     <div className="mt-12 animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
       <div className="glass-card rounded-3xl p-8 text-center">
         <h3 className="text-2xl font-bold text-space-brown mb-4 font-serif">
-          2025 Reading Goal
+          {new Date().getFullYear()} Reading Goal
         </h3>
         <div className="flex items-center justify-center mb-6">
           <div className="text-5xl font-bold text-space-red">{totalBooksRead}</div>

@@ -10,6 +10,9 @@ export interface User extends Document {
   lastActive: string;
   friends: string[];
   createdAt: string;
+  favoriteGenre: string,
+  bio: string,
+  favoriteAuthor: string,
 
 }
 
@@ -37,6 +40,18 @@ const UserSchema: Schema = new Schema({
     type: Number,
     required: false,
     default: 12
+  },
+  favoriteGenre: {
+    type: String,
+    required: false,
+  },
+  bio: {
+    type: String,
+    required: false,
+  },
+  favoriteAuthor: {
+    type: String,
+    required: false,
   },
   dateJoined: {
     type: String,
