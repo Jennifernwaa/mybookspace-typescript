@@ -11,6 +11,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 
+const userId = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
+
 const NavBar = () => {
   const pathname = usePathname();
   const router = useRouter();
@@ -84,8 +86,10 @@ const NavBar = () => {
                       <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 border">
                         <ul className="py-2">
                           <li>
-                            <Link href="/profile" className="block px-4 py-2 brown-text hover:space-red-text hover:bg-gray-100">
-                              Profile Settings
+                            <Link 
+                              href={userId ? `/profile/${userId}` : "/profile"}
+                              className="block px-4 py-2 brown-text hover:space-red-text hover:bg-gray-100">
+                                Profile Settings
                             </Link>
                           </li>
                           <li>

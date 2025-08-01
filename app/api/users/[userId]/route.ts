@@ -1,6 +1,5 @@
 
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
 import { z } from 'zod';
 import connectToDB from '@/lib/mongodb';
 import User from '@/models/User';
@@ -40,24 +39,24 @@ async function authenticateUser(request: NextRequest): Promise<
 }
 
 // GET user profile
+// --- GET user profile ---
 export async function GET(request: NextRequest, context: any) {
   try {
     await connectToDB();
 
     const auth = await authenticateUser(request);
     if ('error' in auth) {
-      return NextResponse.json({ error: auth.error }, { status: auth.status });
+      return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
     }
 
     const { userId } = await context.params;
 
-    // Compare both as strings to avoid 403 error
     if (auth.userId.toString() !== userId.toString()) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });
     }
 
     if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'Invalid ID' }, { status: 400 });
     }
 
     const user = await User.findByIdAndUpdate(
@@ -67,16 +66,17 @@ export async function GET(request: NextRequest, context: any) {
     );
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
     }
 
     const { password, ...rest } = user.toObject();
-    return NextResponse.json(rest);
+    return NextResponse.json({ success: true, data: rest });
   } catch (err) {
     console.error('GET user error:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }
+
 
 
 // PATCH to update user (partial)
@@ -86,14 +86,14 @@ export async function PATCH(request: NextRequest, context: any) {
     const auth = await authenticateUser(request);
     if ('error' in auth) return NextResponse.json({ error: auth.error }, { status: auth.status });
 
-    const { userId } = context.params;
+    const { userId } = await context.params;
     if (auth.userId !== userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     if (!mongoose.Types.ObjectId.isValid(userId)) return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
 
     const updates = await request.json();
     const parsed = updateUserSchema.safeParse(updates);
     if (!parsed.success) {
-      return NextResponse.json({ error: 'Validation failed', details: parsed.error.errors }, { status: 400 });
+      return NextResponse.json({ error: 'Validation failed', details: parsed.error.issues }, { status: 400 });
     }
 
     updates.lastActive = new Date();
@@ -106,7 +106,7 @@ export async function PATCH(request: NextRequest, context: any) {
     if (!updated) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
     const { password, ...rest } = updated.toObject();
-    return NextResponse.json({ message: 'Profile updated', user: rest });
+    return NextResponse.json({ success: true, data: updated , message: 'Profile updated', user: rest });
   } catch (err: any) {
     console.error('PATCH user error:', err);
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
@@ -134,36 +134,23 @@ export async function DELETE(request: NextRequest, context: any) {
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { uid: string } }
-) {
+// PUT
+export async function PUT(request: NextRequest, context: any) {
+  await connectToDB();
   try {
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+    const auth = await authenticateUser(request);
+    if ('error' in auth) return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
 
-    const { uid } = params;
-    
-    // Users can only update their own profile
-    if (session.user.id !== uid) {
-      return NextResponse.json(
-        { error: 'Forbidden' },
-        { status: 403 }
-      );
-    }
+    const { userId } = await context.params;
+
+    if (auth.userId !== userId) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 403 });
+    if (!mongoose.Types.ObjectId.isValid(userId)) return NextResponse.json({ success: false, error: 'Invalid ID' }, { status: 400 });
 
     const body = await request.json();
     const validatedData = updateUserSchema.parse(body);
 
-    await connectToDB();
-    
     const updatedUser = await User.findByIdAndUpdate(
-      uid,
+      userId,
       {
         ...validatedData,
         lastActive: new Date(),
@@ -172,25 +159,16 @@ export async function PUT(
     ).select('-password');
 
     if (!updatedUser) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
     }
 
-    return NextResponse.json(updatedUser);
+    return NextResponse.json({ success: true, data: updatedUser });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Validation error' },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: 'Validation error' }, { status: 400 });
     }
-    
+
     console.error('Error updating user:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

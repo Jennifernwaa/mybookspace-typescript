@@ -179,3 +179,30 @@ export interface BookDetailState {
   isLoading: boolean;
   error: string | null;
 }
+
+export interface UserStats {
+  totalBooksRead: number;
+  booksThisYear: number;
+  totalBooks: number;
+  favoriteBooks: number;
+  friendsCount: number;
+  readingStreak: number;
+  readingGoal: number;
+  goalProgress: number;
+  statusCounts: {
+    finished: number;
+    reading: number;
+    'want-to-read': number;
+    'did-not-finish': number;
+  };
+  topGenres: { name: string; count: number }[];
+  recentActivity: {
+    id: string;
+    title: string;
+    author: string;
+    status: string;
+    rating: number;
+    updatedAt: Date;
+  }[];
+}
+

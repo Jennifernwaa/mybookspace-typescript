@@ -9,25 +9,26 @@ export const useDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showNameEntry, setShowNameEntry] = useState(false);
 
-  const uid = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
+  const userId = typeof window !== 'undefined' ? localStorage.getItem('userId') : null;
 
   const fetchDashboardData = useCallback(async () => {
-    if (!uid) {
+    if (!userId) {
       setIsLoading(false);
       return;
     }
 
     setIsLoading(true);
     try {
-      const userRes = await fetch(`/api/users/${uid}`);
+      const userRes = await fetch(`/api/users/${userId}`);
       if (!userRes.ok) throw new Error('Failed to fetch user profile data');
 
-      const userData: UserData = await userRes.json();
-      setUserData(userData);
+      const userData = await userRes.json();
+      const userInfo = userData.data; // extract the user object
+      setUserData(userInfo);
 
-      setShowNameEntry(!userData.userName || userData.userName.trim() === '');
+      setShowNameEntry(!userInfo.userName || userInfo.userName.trim() === '');
 
-      const booksRes = await fetch(`/api/books?userId=${uid}`);
+      const booksRes = await fetch(`/api/books?userId=${userId}`);
       if (!booksRes.ok) throw new Error('Failed to fetch user books');
 
       const fetchedBooksResponse = await booksRes.json();
@@ -39,17 +40,17 @@ export const useDashboard = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [uid]);
+  }, [userId]);
 
   useEffect(() => {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
   const handleNameSubmission = async (data: NameEntryData) => {
-    if (!uid) throw new Error('User not authenticated.');
+    if (!userId) throw new Error('User not authenticated.');
 
     try {
-      const res = await fetch(`/api/users/${uid}`, {
+      const res = await fetch(`/api/users/${userId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -70,6 +71,7 @@ export const useDashboard = () => {
   const booksRead = allBooks.filter(book => book.status === 'finished');
   const currentlyReading = allBooks.filter(book => book.status === 'reading');
   const wantToRead = allBooks.filter(book => book.status === 'wantToRead');
+  const favoriteBooks = allBooks.filter(book => book.favorite);
 
   return {
     userData,
@@ -77,6 +79,7 @@ export const useDashboard = () => {
     booksRead,
     currentlyReading,
     wantToRead,
+    favoriteBooks,
     isLoading,
     showNameEntry,
     handleNameSubmission,

@@ -4,16 +4,16 @@ import User from '@/models/User';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { uid: string } }
+  { params }: { params: { userId: string } }
 ) {
   try {
     await connectToDB();
-    const { uid } = params;
+    const { userId } = params;
     const { searchParams } = new URL(request.url);
     const limit = searchParams.get('limit');
     const page = searchParams.get('page') || '1';
 
-    const user = await User.findById(uid).populate('friends', 'userName email profilePicture lastActive');
+    const user = await User.findById(userId).populate('friends', 'userName email profilePicture lastActive');
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
@@ -40,10 +40,10 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { uid: string } }
+  { params }: { params: { userId: string } }
 ) {
   try {
-    const { uid } = params;
+    const { userId } = params;
     const { friendId } = await request.json();
 
     await connectToDB();
@@ -53,8 +53,8 @@ export async function POST(
       return NextResponse.json({ error: 'Friend not found' }, { status: 404 });
     }
 
-    await User.findByIdAndUpdate(uid, { $addToSet: { friends: friendId } }, { new: true });
-    await User.findByIdAndUpdate(friendId, { $addToSet: { friends: uid } }, { new: true });
+    await User.findByIdAndUpdate(userId, { $addToSet: { friends: friendId } }, { new: true });
+    await User.findByIdAndUpdate(friendId, { $addToSet: { friends: userId } }, { new: true });
 
     return NextResponse.json({ message: 'Friend added successfully' });
   } catch (error) {
@@ -65,10 +65,10 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { uid: string } }
+  { params }: { params: { userId: string } }
 ) {
   try {
-    const { uid } = params;
+    const { userId } = params;
     const { searchParams } = new URL(request.url);
     const friendId = searchParams.get('friendId');
 
@@ -78,8 +78,8 @@ export async function DELETE(
 
     await connectToDB();
 
-    await User.findByIdAndUpdate(uid, { $pull: { friends: friendId } }, { new: true });
-    await User.findByIdAndUpdate(friendId, { $pull: { friends: uid } }, { new: true });
+    await User.findByIdAndUpdate(userId, { $pull: { friends: friendId } }, { new: true });
+    await User.findByIdAndUpdate(friendId, { $pull: { friends: userId } }, { new: true });
 
     return NextResponse.json({ message: 'Friend removed successfully' });
   } catch (error) {

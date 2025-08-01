@@ -3,24 +3,21 @@ import connectToDB from '@/lib/mongodb';
 import Book from '@/models/Book';
 import User from '@/models/User';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { uid: string } }
-) {
+export async function GET(request: NextRequest, context: any) {
   try {
     await connectToDB();
-    const { uid } = params;
+    const { userId } = await context.params;
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status');
     const limit = searchParams.get('limit');
     const page = searchParams.get('page') || '1';
 
-    const user = await User.findById(uid);
+    const user = await User.findById(userId);
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const query: any = { userId: uid };
+    const query: any = { userId: userId };
     if (status) query.status = status;
 
     const pipeline: any[] = [
@@ -38,7 +35,8 @@ export async function GET(
     const totalCount = await Book.countDocuments(query);
 
     return NextResponse.json({
-      books,
+      success: true,
+      data: books,
       totalCount,
       currentPage: parseInt(page),
       totalPages: limit ? Math.ceil(totalCount / parseInt(limit)) : 1
@@ -49,19 +47,16 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { uid: string } }
-) {
+export async function POST(request: NextRequest, context: any) {
   try {
-    const { uid } = params;
+    const { userId } = await context.params;
     const body = await request.json();
 
     await connectToDB();
 
     const newBook = new Book({
       ...body,
-      userId: uid,
+      userId: userId,
       createdAt: new Date(),
       updatedAt: new Date()
     });

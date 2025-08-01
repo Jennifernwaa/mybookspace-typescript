@@ -4,12 +4,13 @@ import { Book, ApiResponse } from '@/types';
 
 export const useBooks = (userId?: string) => {
   const [books, setBooks] = useState<Book[]>([]);
+  const [favoriteBooks, setFavoriteBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const targetUserId = userId || localStorage.getItem('userId');
 
-  const fetchBooks = useCallback(async () => {
+  const fetchUserBooks = useCallback(async () => {
     if (!targetUserId) {
       setIsLoading(false);
       return;
@@ -19,6 +20,9 @@ export const useBooks = (userId?: string) => {
       setIsLoading(true);
       setError(null);
       
+      // We will now fetch all user books and favorite books separately
+      // This is a placeholder for a more optimized approach. 
+      // The `useProfile` hook will be updated to handle this better.
       const res = await fetch(`/api/users/${targetUserId}/books`);
       if (!res.ok) {
         throw new Error(`Failed to fetch books: ${res.status}`);
@@ -59,16 +63,26 @@ export const useBooks = (userId?: string) => {
     if (!targetUserId) return [];
 
     try {
-      const res = await fetch(`/api/users/${targetUserId}/books/favorites`);
+      setIsLoading(true);
+      setError(null);
+      const res = await fetch(`/api/users/${targetUserId}/books/favorite`);
       if (!res.ok) {
         throw new Error('Failed to fetch favorite books');
       }
       
       const response: ApiResponse<Book[]> = await res.json();
-      return response.success && response.data ? response.data : [];
+      if (response.success && response.data) {
+        setFavoriteBooks(response.data);
+        return response.data;
+      } else {
+        throw new Error(response.error || 'Failed to fetch favorite books');
+      }
     } catch (err) {
       console.error('Error fetching favorite books:', err);
+      setError(err instanceof Error ? err.message : 'Unknown error');
       return [];
+    } finally {
+      setIsLoading(false);
     }
   }, [targetUserId]);
 
@@ -160,15 +174,18 @@ export const useBooks = (userId?: string) => {
   }, [targetUserId]);
 
   const refetchBooks = useCallback(() => {
-    fetchBooks();
-  }, [fetchBooks]);
+    fetchUserBooks();
+    fetchFavoriteBooks();
+  }, [fetchUserBooks, fetchFavoriteBooks]);
 
   useEffect(() => {
-    fetchBooks();
-  }, [fetchBooks]);
+    fetchUserBooks();
+    fetchFavoriteBooks();
+  }, [fetchUserBooks, fetchFavoriteBooks]);
 
   return {
     books,
+    favoriteBooks,
     isLoading,
     error,
     fetchBooksByStatus,
@@ -179,3 +196,4 @@ export const useBooks = (userId?: string) => {
     refetchBooks,
   };
 };
+

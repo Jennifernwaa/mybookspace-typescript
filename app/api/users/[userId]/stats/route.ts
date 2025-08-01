@@ -3,17 +3,15 @@ import connectToDB from '@/lib/mongodb';
 import Book from '@/models/Book';
 import User from '@/models/User';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { uid: string } }
+export async function GET( request: NextRequest, context: any
 ) {
   try {
     await connectToDB();
     
-    const { uid } = params;
+    const { userId } = await context.params;
 
     // Check if user exists
-    const user = await User.findById(uid);
+    const user = await User.findById(userId);
     if (!user) {
       return NextResponse.json(
         { error: 'User not found' },
@@ -37,37 +35,37 @@ export async function GET(
       topGenres
     ] = await Promise.all([
       // Total books read (finished)
-      Book.countDocuments({ userId: uid, status: 'finished' }),
+      Book.countDocuments({ userId: userId, status: 'finished' }),
       
       // Books finished this year
       Book.countDocuments({ 
-        userId: uid, 
+        userId: userId, 
         status: 'finished',
         finishedAt: { $gte: yearStart, $lte: yearEnd }
       }),
       
       // Total books in library
-      Book.countDocuments({ userId: uid }),
+      Book.countDocuments({ userId: userId }),
       
       // Favorite books count
-      Book.countDocuments({ userId: uid, favorite: true }),
+      Book.countDocuments({ userId: userId, favorite: true }),
       
       // Books by status
       Book.aggregate([
-        { $match: { userId: uid } },
+        { $match: { userId: userId } },
         { $group: { _id: '$status', count: { $sum: 1 } } }
       ]),
       
       // Reading streak (simplified - books finished in last 30 days)
       Book.countDocuments({ 
-        userId: uid, 
+        userId: userId, 
         status: 'finished',
         finishedAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
       }),
       
       // Top genres
       Book.aggregate([
-        { $match: { userId: uid } },
+        { $match: { userId: userId } },
         { $group: { _id: '$genre', count: { $sum: 1 } } },
         { $sort: { count: -1 } },
         { $limit: 5 }
@@ -88,7 +86,7 @@ export async function GET(
     const goalProgress = Math.min((booksThisYear / readingGoal) * 100, 100);
 
     // Recent activity (last 10 books)
-    const recentActivity = await Book.find({ userId: uid })
+    const recentActivity = await Book.find({ userId: userId })
       .sort({ updatedAt: -1 })
       .limit(10)
       .select('title author status updatedAt rating');

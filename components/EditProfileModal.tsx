@@ -5,7 +5,7 @@ interface EditProfileModalProps {
   isVisible: boolean;
   onClose: () => void;
   onSubmit: (data: {
-    username: string;
+    userName: string;
     bio: string;
     favoriteGenre: string;
     readingGoal: number;
@@ -14,10 +14,11 @@ interface EditProfileModalProps {
     showProgress: boolean;
     friendRecs: boolean;
   }) => Promise<void>;
+  userData: any;
 }
 
-export const EditProfileModal: React.FC<EditProfileModalProps> = ({ isVisible, onClose, onSubmit }) => {
-  const [username, setUsername] = useState('');
+export const EditProfileModal: React.FC<EditProfileModalProps> = ({ isVisible, onClose, onSubmit, userData }) => {
+  const [userName, setuserName] = useState('');
   const [bio, setBio] = useState('');
   const [favoriteGenre, setFavoriteGenre] = useState('fantasy');
   const [readingGoal, setReadingGoal] = useState(60);
@@ -25,7 +26,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ isVisible, o
   const [publicReadingList, setPublicReadingList] = useState(true);
   const [showProgress, setShowProgress] = useState(true);
   const [friendRecs, setFriendRecs] = useState(true);
-  const [errors, setErrors] = useState<{ username?: boolean }>({});
+  const [errors, setErrors] = useState<{ userName?: boolean }>({});
   const [isLoading, setIsLoading] = useState(false);
 
   // Effect to update CSS classes when isVisible changes
@@ -47,13 +48,26 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ isVisible, o
     }
   }, [isVisible]);
 
+  useEffect(() => {
+    if (isVisible && userData) {
+      setuserName(userData.userName || '');
+      setBio(userData.bio || '');
+      setFavoriteGenre(userData.favoriteGenre || 'fantasy');
+      setReadingGoal(userData.readingGoal || 60);
+      setFavoriteAuthor(userData.favoriteAuthor || '');
+      setPublicReadingList(userData.publicReadingList ?? true);
+      setShowProgress(userData.showProgress ?? true);
+      setFriendRecs(userData.friendRecs ?? true);
+    }
+  }, [isVisible, userData]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
       await onSubmit({
-        userName: username,
+        userName: userName,
         bio,
         favoriteGenre,
         readingGoal,
@@ -118,15 +132,15 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ isVisible, o
         <form id="editProfileForm" className="space-y-6" onSubmit={handleSubmit}>
           {/* */}
           <div>
-            <label className="block text-space-brown font-semibold mb-2">Username</label>
+            <label className="block text-space-brown font-semibold mb-2">userName</label>
             <input
               type="text"
-              id="usernameModal"
+              id="userNameModal"
               className="w-full px-4 py-3 rounded-2xl border-2 border-cream-medium focus:border-salmon focus:outline-none transition-colors bg-cream-light"
-              value={username}
+              value={userName}
               onChange={(e) => {
-                setUsername(e.target.value);
-                if (errors.username) setErrors((prev) => ({ ...prev, username: false }));
+                setuserName(e.target.value);
+                if (errors.userName) setErrors((prev) => ({ ...prev, userName: false }));
               }}
             />
           </div>

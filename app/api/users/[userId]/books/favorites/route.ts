@@ -3,29 +3,21 @@ import connectToDB from '@/lib/mongodb';
 import Book from '@/models/Book';
 import User from '@/models/User';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { uid: string } }
-) {
+export async function GET(request: NextRequest, context: any) {
   try {
     await connectToDB();
     
-    const { uid } = params;
+    const { userId } = await context.params;
     const { searchParams } = new URL(request.url);
     const limit = searchParams.get('limit');
 
-    // Check if user exists
-    const user = await User.findById(uid);
+    const user = await User.findById(userId);
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Build query for favorite books
     const query = { 
-      userId: uid, 
+      userId: userId, 
       favorite: true 
     };
 
@@ -39,8 +31,9 @@ export async function GET(
     const totalCount = await Book.countDocuments(query);
 
     return NextResponse.json({
-      books: favoriteBooks,
-      totalCount
+      success: true,
+      data: favoriteBooks,
+      totalCount,
     });
   } catch (error) {
     console.error('Error fetching favorite books:', error);

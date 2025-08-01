@@ -1,55 +1,78 @@
-
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useEffect, useState } from 'react';
 import { useUser } from './useUser';
 import { useBooks } from './useBooks';
-import { User, Book } from '@/types';
+import { User, Book, ApiResponse } from '@/types'; // Assuming ApiResponse and UserStats are defined
+import { useParams } from 'next/navigation';
 
+export const useProfile = () => {
+  const params = useParams();
+  const urlUserId = params?.userId as string | undefined;
+  const localUserId = typeof window !== 'undefined' ? localStorage.getItem('userId') ?? undefined : undefined;
+  const targetUserId = urlUserId || localUserId;
 
-export const useProfile = (userId?: string) => {
-  const currentUserId = localStorage.getItem('userId');
-  const targetUserId = userId || currentUserId;
-  const isOwnProfile = targetUserId === currentUserId;
+  const [stats, setStats] = useState<{ totalBooksRead: number, friendsCount: number } | null>(null);
+  const [favoriteBooks, setFavoriteBooks] = useState<Book[]>([]);
+  const [isStatsLoading, setIsStatsLoading] = useState(true);
+  const [statsError, setStatsError] = useState<string | null>(null);
 
-  const { 
-    userData, 
-    isLoading: userLoading, 
-    error: userError, 
-    updateUser, 
-    refetchUser 
+  const isOwnProfile = targetUserId === localUserId;
+
+  const {
+    userData,
+    isLoading: userLoading,
+    error: userError,
+    updateUser,
+    refetchUser
   } = useUser(targetUserId);
 
-  const { 
-    books, 
-    isLoading: booksLoading, 
-    error: booksError, 
-    fetchBooksByStatus, 
-    fetchFavoriteBooks,
-    refetchBooks
-  } = useBooks(targetUserId);
+  const fetchProfileData = useCallback(async () => {
+    if (!targetUserId) {
+      setIsStatsLoading(false);
+      return;
+    }
 
-  // Calculate reading stats
-  const readingStats = useMemo(() => {
-    const finishedBooks = books.filter(book => book.status === 'finished');
-    const currentlyReading = books.filter(book => book.status === 'reading');
-    const wantToRead = books.filter(book => book.status === 'wantToRead');
-    const favoriteBooks = books.filter(book => book.favorite);
+    setIsStatsLoading(true);
+    setStatsError(null);
+    
+    try {
+      const [statsRes, favoriteBooksRes] = await Promise.all([
+        fetch(`/api/users/${targetUserId}/stats`),
+        fetch(`/api/users/${targetUserId}/books/favorites`),
+      ]);
 
-    return {
-      booksRead: finishedBooks.length,
-      currentlyReading: currentlyReading.length,
-      wantToRead: wantToRead.length,
-      favoriteBooks: favoriteBooks.length,
-      totalBooks: books.length,
-    };
-  }, [books]);
+      const statsData = await statsRes.json();
+      const favoriteBooksData: ApiResponse<Book[]> = await favoriteBooksRes.json();
 
-  // Get friends count
-  const friendsCount = useMemo(() => {
-    return userData?.friends ? userData.friends.length : 0;
-  }, [userData]);
+      // Check for success property from both API calls
+      // The stats API you provided doesn't have a 'success' key, so we'll check its data structure
+      if (statsData.totalBooksRead !== undefined && favoriteBooksData.success) {
+        setStats({
+          totalBooksRead: statsData.totalBooksRead,
+          friendsCount: statsData.friendsCount,
+        });
+        setFavoriteBooks(favoriteBooksData.data || []);
+      } else {
+        throw new Error('Failed to fetch profile stats or favorite books');
+      }
+    } catch (err) {
+      console.error('Error fetching profile data:', err);
+      setStatsError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setIsStatsLoading(false);
+    }
+  }, [targetUserId]);
 
-  // Update profile with validation
-  const updateProfile = useCallback(async (updates) => {
+  useEffect(() => {
+    fetchProfileData();
+  }, [fetchProfileData]);
+  
+  const readingStats = useMemo(() => ({
+    booksRead: stats?.totalBooksRead || 0,
+  }), [stats]);
+  
+  const friendsCount = useMemo(() => stats?.friendsCount || 0, [stats]);
+
+  const updateProfile = useCallback(async (updates: Partial<User>) => {
     if (!userData?._id) throw new Error('No user ID');
     const res = await fetch(`/api/users/${userData._id}`, {
       method: 'PATCH',
@@ -61,49 +84,25 @@ export const useProfile = (userId?: string) => {
       const err = await res.json();
       throw new Error(err.error || 'Failed to update profile');
     }
-    // Optionally refetch user data here
   }, [userData]);
 
-  // Get recent activity (mock implementation - you'll need to implement this)
-  const getRecentActivity = useCallback(async () => {
-    // This would typically fetch from an activity/timeline API
-    // For now, we'll derive it from recent books
-    const recentBooks = books
-      .filter(book => book.dateCompleted || book.dateAdded)
-      .sort((a, b) => {
-        const dateA = new Date(book.dateCompleted || book.dateAdded).getTime();
-        const dateB = new Date(b.dateCompleted || b.dateAdded).getTime();
-        return dateB - dateA;
-      })
-      .slice(0, 5);
-
-    return recentBooks.map(book => ({
-      type: book.status === 'finished' ? 'completed' : 'started',
-      book: book,
-      date: book.dateCompleted || book.dateAdded,
-    }));
-  }, [books]);
-
-  const isLoading = userLoading || booksLoading;
-  const error = userError || booksError;
+  const isLoading = userLoading || isStatsLoading;
+  const error = userError || statsError;
 
   const refetchProfile = useCallback(() => {
     refetchUser();
-    refetchBooks();
-  }, [refetchUser, refetchBooks]);
+    fetchProfileData();
+  }, [refetchUser, fetchProfileData]);
 
   return {
     userData,
-    books,
+    favoriteBooks,
     isLoading,
     error,
     isOwnProfile,
     readingStats,
     friendsCount,
     updateProfile,
-    fetchBooksByStatus,
-    fetchFavoriteBooks,
-    getRecentActivity,
     refetchProfile,
   };
 };
