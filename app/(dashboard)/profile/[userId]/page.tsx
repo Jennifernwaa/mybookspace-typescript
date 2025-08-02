@@ -1,6 +1,5 @@
 'use client';
-import { EditProfileModal } from '@/components/EditProfileModal';
-import FavoriteBookSection from '@/components/FavoriteBookSection';
+import BookCards from '@/components/BookCards';
 import ProfileCard from '@/components/Profile/ProfileCard';
 import RecentActivity from '@/components/Profile/RecentActivity';
 import UserStats from '@/components/Profile/UserStats';
@@ -67,7 +66,7 @@ export default function ProfilePage() {
 
       {/* User Favorite Books*/}
       <div id="favorite-books-section" className="animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
-        <FavoriteBookSection books={favoriteBooks} />
+        <BookCards books={favoriteBooks} pageType="profile" />
       </div>
     </main>
   );

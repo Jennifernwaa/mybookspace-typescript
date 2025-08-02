@@ -15,28 +15,42 @@ export const useBooks = (userId?: string) => {
       setIsLoading(false);
       return;
     }
-
-    try {
       setIsLoading(true);
       setError(null);
-      
-      // We will now fetch all user books and favorite books separately
-      // This is a placeholder for a more optimized approach. 
-      // The `useProfile` hook will be updated to handle this better.
-      const res = await fetch(`/api/users/${targetUserId}/books`);
-      if (!res.ok) {
-        throw new Error(`Failed to fetch books: ${res.status}`);
+    try {
+      // Use Promise.all to fetch both lists concurrently
+      const [userBooksRes, favoriteBooksRes] = await Promise.all([
+        fetch(`/api/users/${targetUserId}/books`),
+        fetch(`/api/users/${targetUserId}/books/favorites`),
+      ]);
+
+      if (!userBooksRes.ok) {
+        throw new Error(`Failed to fetch user books: ${userBooksRes.status}`);
+      }
+      if (!favoriteBooksRes.ok) {
+        throw new Error(`Failed to fetch favorite books: ${favoriteBooksRes.status}`);
       }
       
-      const response: ApiResponse<Book[]> = await res.json();
-      if (response.success && response.data) {
-        setBooks(response.data);
+      const userBooksResponse: ApiResponse<Book[]> = await userBooksRes.json();
+      const favoriteBooksResponse: ApiResponse<Book[]> = await favoriteBooksRes.json();
+
+      if (userBooksResponse.success && userBooksResponse.data) {
+        setBooks(userBooksResponse.data);
       } else {
-        throw new Error(response.error || 'Failed to fetch books');
+        throw new Error(userBooksResponse.error || 'Failed to fetch user books');
       }
+
+      if (favoriteBooksResponse.success && favoriteBooksResponse.data) {
+        setFavoriteBooks(favoriteBooksResponse.data);
+      } else {
+        throw new Error(favoriteBooksResponse.error || 'Failed to fetch favorite books');
+      }
+
     } catch (err) {
-      console.error('Error fetching books:', err);
+      console.error('Error fetching all books:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
+      setBooks([]);
+      setFavoriteBooks([]);
     } finally {
       setIsLoading(false);
     }
@@ -63,9 +77,7 @@ export const useBooks = (userId?: string) => {
     if (!targetUserId) return [];
 
     try {
-      setIsLoading(true);
-      setError(null);
-      const res = await fetch(`/api/users/${targetUserId}/books/favorite`);
+      const res = await fetch(`/api/users/${targetUserId}/books/favorites`);
       if (!res.ok) {
         throw new Error('Failed to fetch favorite books');
       }

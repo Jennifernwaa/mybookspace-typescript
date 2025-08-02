@@ -148,6 +148,7 @@ export interface OpenLibraryBook {
   language?: string[];
   description?: string | { value: string };
   rating?: number;
+  cover_url?: string;
 }
 
 export interface BookData {
