@@ -27,7 +27,7 @@ export const useBookSave = (userId: string) => {
     try {
       const bookData = transformToBookData(book, userId);
       
-      const response = await fetch('/api/books', {
+      const response = await fetch(`/api/books`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bookData),

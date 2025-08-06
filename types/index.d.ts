@@ -79,7 +79,7 @@ export interface Book {
   notes?: string;
   favorite?: boolean;
   dateCompleted?: string;
-  first_publish_year: number;
+  first_publish_year: string;
   cover_url?: string;
   dateAdded: string;
   // Add these if they are part of your Book model
@@ -137,18 +137,22 @@ export interface DashboardData {
 export interface OpenLibraryBook {
   key: string;
   title: string;
-  author_name?: string[];
+  author_name?: string;
   publisher?: string[];
-  first_publish_year?: number;
+  first_publish_year?: string;
   isbn?: string[];
   cover_i?: number;
   subject?: string[];
   subjects?: string[];
-  number_of_pages_median?: number;
-  language?: string[];
+  number_of_pages?: number;
   description?: string | { value: string };
   rating?: number;
   cover_url?: string;
+  languages?: { key: string }[];
+}
+
+export interface RecommendedBook extends OpenLibraryBook {
+  cover_url: string;
 }
 
 export interface BookData {

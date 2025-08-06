@@ -3,11 +3,11 @@
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { OpenLibraryBook } from '@/types';
+import { OpenLibraryBook, RecommendedBook } from '@/types';
 import { generateBookSlug } from '@/utils/bookUtils';
 
 interface BookCardsProps {
-  books: OpenLibraryBook[];
+  books: RecommendedBook[];
   pageType: 'recommendation' | 'profile';
   onBookClick?: (book: OpenLibraryBook) => void;
 }
@@ -87,21 +87,21 @@ const BookCards: React.FC<BookCardsProps> = ({
             const slug = generateBookSlug(book);
             const searchParams = new URLSearchParams({
               title: book.title,
-              author: book.author_name?.[0] || 'Unknown',
+              author: book.author_name || 'Unknown',
               key: book.key,
+              ...(book.cover_url && { cover_url: book.cover_url }),
               ...(book.isbn?.[0] && { isbn: book.isbn[0] }),
               ...(book.cover_i && { cover_i: book.cover_i.toString() }),
               ...(book.first_publish_year && { year: book.first_publish_year.toString() }),
               ...(book.publisher?.[0] && { publisher: book.publisher[0] }),
-              ...(book.number_of_pages_median && { pages: book.number_of_pages_median.toString() }),
-              ...(book.language?.[0] && { language: book.language[0] }),
+              ...(book.number_of_pages && { pages: book.number_of_pages.toString() }),
               ...(book.description && typeof book.description === 'string' && { description: book.description }),
             }).toString();
 
             return (
               <Link
                 key={book.key || index}
-                href={`/books/${slug}?${searchParams}`}
+                href={`/books/${slug}?${searchParams.toString()}`}
                 className="book-preview-card rounded-2xl p-6 group cursor-pointer"
                 onClick={() => onBookClick?.(book)}
               >
@@ -109,11 +109,7 @@ const BookCards: React.FC<BookCardsProps> = ({
                   className={`bg-gradient-to-br ${gradients[index % gradients.length]} rounded-xl mb-4 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300`}
                 >
                   <Image
-                    src={
-                      book.cover_url && book.cover_url !== "https://via.placeholder.com/150?text=No+Cover"
-                        ? book.cover_url
-                        : "/images/hardcover.png"
-                    }
+                    src={book.cover_url}
                     alt={`Cover for ${book.title}`}
                     width={150}
                     height={300}
@@ -125,7 +121,7 @@ const BookCards: React.FC<BookCardsProps> = ({
                   {book.title}
                 </h3>
                 <p className="text-warm-brown text-sm opacity-75 mb-3 truncate">
-                  by {book.author_name?.[0] || 'Unknown'}
+                  by {book.author_name}
                 </p>
               </Link>
             );

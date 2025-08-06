@@ -18,7 +18,6 @@ export function useUserSearch(query: string) {
         setIsSearching(true);
         const res = await fetch(`/api/users/search?q=${encodeURIComponent(query)}`);
         const data = await res.json();
-        console.log(data);
         setResults(data.data || []);
       } catch (err) {
         console.error('User search error:', err);

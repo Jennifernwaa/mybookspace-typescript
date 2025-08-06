@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useBookDetails } from '@/hooks/useBookDetails';
 import { useBookSave } from '@/hooks/useBookSave';
-import { useDashboard } from '@/hooks/useDashboard';
 import { OpenLibraryBook } from '@/types';
 import { reconstructBookFromParams } from '@/utils/bookDetailUtils';
 import { BookCover } from '@/components/BookDetail/BookCover';
@@ -30,9 +29,16 @@ const BookDetailPage: React.FC = () => {
     clearMessages 
   } = useBookSave(userData?._id || '');
 
+  // State to hold the book data from the URL params while full details are fetched.
+  const [bookFromParams, setBookFromParams] = useState<OpenLibraryBook | null>(null);
+
   useEffect(() => {
     const reconstructedBook = reconstructBookFromParams(searchParams);
     if (reconstructedBook) {
+      // Immediately set the book data from the URL to display a correct cover.
+      setBookFromParams(reconstructedBook);
+
+      // Trigger the full data fetch using the book's unique key.
       fetchBookDetails(reconstructedBook);
     }
   }, [searchParams, fetchBookDetails]);
@@ -54,9 +60,12 @@ const BookDetailPage: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [successMessage, saveError, clearMessages]);
+  
+  // Use the full book data if available, otherwise use the data from the URL params.
+  const currentBook = book || bookFromParams;
 
-  if (isLoading) return <LoadingState />;
-  if (error || !book) return <ErrorState onGoBack={handleGoBack} />;
+  if (isLoading || !currentBook) return <LoadingState />;
+  if (error) return <ErrorState onGoBack={handleGoBack} />;
 
   return (
     <div className="min-h-screen">
@@ -71,14 +80,14 @@ const BookDetailPage: React.FC = () => {
           <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
             <div className="md:flex">
               <div className="md:w-1/3 p-8 bg-gradient-to-br from-cream-light to-peach-light">
-                <BookCover book={book} />
+                <BookCover book={currentBook} />
                 <ActionButtons 
-                  book={book}
+                  book={currentBook}
                   onSaveBook={handleSaveBook}
                   isSaving={isSaving}
                 />
               </div>
-              <BookInfo book={book} />
+              <BookInfo book={currentBook} />
             </div>
           </div>
         </div>

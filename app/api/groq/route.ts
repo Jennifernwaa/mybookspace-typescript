@@ -31,8 +31,8 @@ export async function POST(req: NextRequest) {
     fullPrompt += `Based on this, recommend 5 new books I haven't read yet. Format your response ONLY as a valid JSON object like this:
 {
   "books": [
-    { "title": "Book Title 1", "author": "Author Name 1", "description": "A brief description of the book." },
-    { "title": "Book Title 2", "author": "Author Name 2", "description": "Another brief description." }
+    { "title": "Book Title 1", "author_name": "Author Name 1", "description": "A brief description of the book." },
+    { "title": "Book Title 2", "author_name": "Author Name 2", "description": "Another brief description." }
   ]
 }
 Return ONLY the JSON and nothing else.`;

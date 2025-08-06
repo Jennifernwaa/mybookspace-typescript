@@ -1,6 +1,6 @@
-import { OpenLibraryBook } from '@/types';
+import { OpenLibraryBook, RecommendedBook } from '@/types';
 
-export const reconstructBookFromParams = (searchParams: URLSearchParams): OpenLibraryBook | null => {
+export const reconstructBookFromParams = (searchParams: URLSearchParams): RecommendedBook | null => {
   const title = searchParams.get('title');
   const key = searchParams.get('key');
   
@@ -9,12 +9,12 @@ export const reconstructBookFromParams = (searchParams: URLSearchParams): OpenLi
   return {
     key,
     title,
-    author_name: searchParams.get('author') ? [searchParams.get('author')!] : undefined,
+    author_name: searchParams.get('author_name') || undefined,
     isbn: searchParams.get('isbn') ? [searchParams.get('isbn')!] : undefined,
     cover_i: searchParams.get('cover_i') ? Number(searchParams.get('cover_i')) : undefined,
-    first_publish_year: searchParams.get('year') ? Number(searchParams.get('year')) : undefined,
+    cover_url: searchParams.get('cover_url') || 'https://via.placeholder.com/150?text=No+Cover',
+    first_publish_year: searchParams.get('year') ? String(searchParams.get('year')) : undefined,
     publisher: searchParams.get('publisher') ? [searchParams.get('publisher')!] : undefined,
-    number_of_pages_median: searchParams.get('pages') ? Number(searchParams.get('pages')) : undefined,
-    language: searchParams.get('language') ? [searchParams.get('language')!] : undefined,
+    number_of_pages: searchParams.get('pages') ? Number(searchParams.get('pages')) : undefined,
   };
 };

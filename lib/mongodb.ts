@@ -35,7 +35,6 @@ export async function connectToDB(): Promise<mongoose.Connection> {
     };
 
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
-      console.log('Connected to MongoDB');
       return mongoose.connection;
     });
   }

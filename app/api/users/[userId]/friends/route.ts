@@ -2,13 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToDB from '@/lib/mongodb';
 import User from '@/models/User';
 
+type Params = {
+  params: Promise<{ userId: string }>;
+};
+
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { userId: string } }
-) {
+  request: NextRequest, { params }: Params) {
   try {
     await connectToDB();
-    const { userId } = params;
+    const { userId } = await params;
     const { searchParams } = new URL(request.url);
     const limit = searchParams.get('limit');
     const page = searchParams.get('page') || '1';
@@ -40,10 +42,10 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: Params
 ) {
   try {
-    const { userId } = params;
+    const { userId } = await params;
     const { friendId } = await request.json();
 
     await connectToDB();
@@ -65,10 +67,10 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  { params }: Params
 ) {
   try {
-    const { userId } = params;
+    const { userId } = await params;
     const { searchParams } = new URL(request.url);
     const friendId = searchParams.get('friendId');
 

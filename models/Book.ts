@@ -75,8 +75,7 @@ const BookSchema: Schema = new Schema({
     default: []
   },
   first_publish_year: {
-    type: Number,
-    min: 0
+    type: String,
   },
   publisher: {
     type: String,

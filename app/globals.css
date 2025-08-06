@@ -313,7 +313,7 @@ html {
     border-color: rgba(203, 118, 102, 0.3);
 }
 
-        .action-button {
+.action-button {
     background: linear-gradient(135deg, 
         rgba(241, 236, 228, 0.9) 0%, 
         rgba(232, 226, 213, 0.95) 100%);

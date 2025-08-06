@@ -8,6 +8,7 @@ interface BookCoverProps {
   book: OpenLibraryBook;
 }
 
+
 export const BookCover = memo(({ book }: BookCoverProps) => {
   const [imageError, setImageError] = useState(false);
 

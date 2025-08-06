@@ -51,7 +51,7 @@ export const BookInfo = memo(({ book }: BookInfoProps) => (
     <div className="mb-6">
       <h1 className="text-3xl font-bold text-space-brown mb-2">{book.title}</h1>
       <p className="text-xl text-warm-brown mb-2">
-        by {book.author_name?.join(', ') || 'Unknown Author'}
+        by {book.author_name || 'Unknown Author'}
       </p>
       <div className="flex items-center mb-4">
         {generateStars(book.rating)}
@@ -64,8 +64,8 @@ export const BookInfo = memo(({ book }: BookInfoProps) => (
     {/* Quick Info Cards */}
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
       <InfoCard icon="📅" label="Published" value={book.first_publish_year} />
-      <InfoCard icon="📄" label="Pages" value={book.number_of_pages_median} />
-      <InfoCard icon="🌍" label="Language" value={book.language?.[0]?.toUpperCase()} />
+      <InfoCard icon="📄" label="Pages" value={book.number_of_pages} />
+      <InfoCard icon="🌍" label="Language" value={book.languages?.[0]?.key?.split('/').pop()} />
       <InfoCard icon="⭐" label="Rating" value={book.rating ? book.rating.toFixed(1) : 'N/A'} />
     </div>
 
@@ -74,9 +74,9 @@ export const BookInfo = memo(({ book }: BookInfoProps) => (
       <h3 className="text-xl font-semibold text-space-brown mb-4">Book Information</h3>
       <InfoRow label="Publisher" value={book.publisher?.join(', ')} />
       <InfoRow label="ISBN" value={book.isbn?.join(', ')} />
-      <InfoRow label="Subjects" value={book.subject?.slice(0, 5).join(', ')} />
-      {book.number_of_pages_median && (
-        <InfoRow label="Number of Pages" value={book.number_of_pages_median.toString()} />
+      <InfoRow label="Subjects" value={book.subjects?.slice(0, 5).join(', ')} />
+      {book.number_of_pages && (
+        <InfoRow label="Number of Pages" value={book.number_of_pages.toString()} />
       )}
     </div>
 

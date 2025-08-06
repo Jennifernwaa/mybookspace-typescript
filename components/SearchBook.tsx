@@ -46,7 +46,7 @@ const BookResultItem = memo(({
     <div className="flex-1 min-w-0">
       <h4 className="font-bold text-space-brown text-lg truncate">{book.title}</h4>
       <p className="text-warm-brown opacity-75 truncate">
-        by {book.author_name?.[0] || "Unknown"}
+        by {book.author_name || "Unknown"}
       </p>
       <div className="text-sm text-warm-brown opacity-60 mt-1 space-y-1">
         <p>Publisher: {book.publisher?.[0] || "Unknown"}</p>
@@ -160,14 +160,13 @@ const SearchBook: React.FC = () => {
     // Use URL params instead of sessionStorage
     const searchParams = new URLSearchParams({
       title: book.title,
-      author: book.author_name?.[0] || 'Unknown',
+      author_name: book.author_name?.[0] || 'Unknown',
       key: book.key,
       ...(book.isbn?.[0] && { isbn: book.isbn[0] }),
       ...(book.cover_i && { cover_i: book.cover_i.toString() }),
       ...(book.first_publish_year && { year: book.first_publish_year.toString() }),
       ...(book.publisher?.[0] && { publisher: book.publisher[0] }),
-      ...(book.number_of_pages_median && { pages: book.number_of_pages_median.toString() }),
-      ...(book.language?.[0] && { language: book.language[0] }),
+      ...(book.number_of_pages && { pages: book.number_of_pages.toString() }),
     });
 
     router.push(`/books/${slug}?${searchParams.toString()}`);

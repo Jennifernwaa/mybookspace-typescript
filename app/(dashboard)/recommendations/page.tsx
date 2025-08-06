@@ -1,20 +1,20 @@
-"use client";
+'use client';
 import BookCards from '@/components/BookCards';
 import { useBooks } from '@/hooks/useBooks';
 import { useUser } from '@/hooks/useUser';
-import { Book } from '@/types';
+import { Book, OpenLibraryBook, RecommendedBook } from '@/types';
 import React, { useState } from 'react';
 
 export default function RecommendationPage () {
   const [userInput, setUserInput] = useState('');
-  const [recommendations, setRecommendations] = useState<Book[]>([]);
+  const [recommendations, setRecommendations] = useState<RecommendedBook[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Assuming useUser and useBooks fetch data from your MongoDB
   const { userData, isLoading: userLoading } = useUser();
   const { books, favoriteBooks, isLoading: booksLoading } = useBooks();
 
-  // The backend API doesn't use this, but it's good to have for future features
+  // The backend API doesn't use this, this is for future features
   const favoriteGenre = userData?.favoriteGenre || '';
 
   const handleRecommend = async () => {
@@ -43,12 +43,11 @@ export default function RecommendationPage () {
       const groqData = await groqRes.json();
       const recommendationFromGroq = groqData.choices[0].message.content.trim();
       const parsedResponseRecommendation = JSON.parse(recommendationFromGroq);
-      const booksFromGroq = parsedResponseRecommendation.books;
+      const booksFromGroq: OpenLibraryBook[] = parsedResponseRecommendation.books;
       
-
       // 2. Fetch cover images for each recommended book from Open Library
       const booksWithCovers = await Promise.all(
-        booksFromGroq.map(async (book: Book) => {
+        booksFromGroq.map(async (book: OpenLibraryBook) => {
           try {
             const openLibraryRes = await fetch(
               `https://openlibrary.org/search.json?title=${encodeURIComponent(book.title)}&limit=1`
@@ -65,6 +64,7 @@ export default function RecommendationPage () {
               
             return {
               ...book,
+              cover_i: coverId,
               cover_url: coverUrl,
             };
           } catch (err) {
@@ -73,7 +73,7 @@ export default function RecommendationPage () {
             return {
               ...book,
               cover_url: 'https://via.placeholder.com/150?text=No+Cover',
-            };
+            }as RecommendedBook;
           }
         })
       );
