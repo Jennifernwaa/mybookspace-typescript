@@ -3,9 +3,10 @@
 import React from 'react';
 import { useFriends } from '@/hooks/useFriends';
 import FriendCard from './FriendCard';
+import { User } from '@/types';
 
-export default function FriendsList() {
-  const { friends, loading, error } = useFriends();
+export default function FriendsList({ friends, loading }: { friends: User[], loading: boolean }) {
+  const { error } = useFriends();
 
   return (
     <section className="bg-white/80 rounded-2xl shadow-lg p-4 md:p-6 flex flex-col overflow-y-auto min-h-[300px] md:min-h-[400px]">

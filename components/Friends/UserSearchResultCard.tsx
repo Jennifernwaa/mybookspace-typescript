@@ -2,13 +2,18 @@
 
 import React from 'react';
 import { User } from '@/types';
-import { useFriends } from '@/hooks/useFriends';
 
-export default function UserSearchResultCard({ user }: { user: User }) {
-  const { addFriend } = useFriends();
+// Update the component to accept onAddFriend as a prop
+export default function UserSearchResultCard({
+  user,
+  onAddFriend,
+}: {
+  user: User;
+  onAddFriend: (userId: string) => Promise<any>; // Add the onAddFriend prop type
+}) {
 
   const handleAdd = async () => {
-    await addFriend(user._id!);
+    await onAddFriend(user._id!);
   };
 
   return (

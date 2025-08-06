@@ -1,14 +1,17 @@
-// /feed/CreatePost.tsx
 'use client';
 
 import { useState } from 'react';
-import { useFeed } from '@/hooks/useFeed';
+import { CreatePostData, useFeed } from '@/hooks/useFeed';
 import { useUser } from '@/hooks/useUser';
 
-export default function CreatePost() {
+interface CreatePostProps {
+  createPost: (postData: CreatePostData) => Promise<any>;
+}
+
+export default function CreatePost({ createPost }: CreatePostProps) {
   const [content, setContent] = useState('');
   const [charCount, setCharCount] = useState(0);
-  const { createPost, creating } = useFeed();
+  const creating = false;
   const { userData } = useUser();
 
   const handlePost = async () => {

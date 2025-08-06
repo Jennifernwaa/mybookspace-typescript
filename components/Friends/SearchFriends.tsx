@@ -3,10 +3,14 @@
 import React, { useState } from 'react';
 import { useUserSearch } from '@/hooks/useUserSearch';
 import UserSearchResultCard from './UserSearchResultCard';
+import { User } from '@/types';
 
-export default function SearchFriends() {
+export default function SearchFriends({ addFriend, friends }: { addFriend: (userId: string) => Promise<{ success: boolean; error?: string; message?: string; }>; friends: User[] }) {
   const [query, setQuery] = useState('');
   const { results, isSearching } = useUserSearch(query);
+
+  const friendsIds = friends.map(friend => friend._id);
+  const filteredResults = results.filter(user => !friendsIds.includes(user._id));
 
   return (
     <section className="bg-white/80 rounded-2xl shadow-lg p-4 md:p-8">
@@ -24,12 +28,17 @@ export default function SearchFriends() {
       </div>
       <div className="space-y-4">
         {isSearching && <p className="text-warm-brown">Searching...</p>}
-        {!isSearching && results.length === 0 && query && (
+        {!isSearching && filteredResults.length === 0 && query && (
           <p className="text-warm-brown">No users found.</p>
         )}
         {!isSearching &&
-          results.map(user => (
-            <UserSearchResultCard key={user._id} user={user} />
+          filteredResults.map(user => (
+            // Pass the addFriend function down to the card
+            <UserSearchResultCard 
+              key={user._id} 
+              user={user} 
+              onAddFriend={addFriend} 
+            />
           ))}
       </div>
     </section>

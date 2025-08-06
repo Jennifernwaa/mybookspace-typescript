@@ -9,7 +9,7 @@ export const useFriends = () => {
   const fetchFriends = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/friends');
+      const response = await fetch(`/api/friends`);
       const data: ApiResponse<User[]> = await response.json();
       
       if (data.success) {
@@ -26,7 +26,7 @@ export const useFriends = () => {
 
   const addFriend = async (targetUserId: string) => {
     try {
-      const response = await fetch('/api/friends/add', {
+      const response = await fetch(`/api/friends/add`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ targetUserId })
@@ -47,7 +47,7 @@ export const useFriends = () => {
 
   const removeFriend = async (targetUserId: string) => {
     try {
-      const response = await fetch('/api/friends/remove', {
+      const response = await fetch(`/api/friends/remove`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ targetUserId })

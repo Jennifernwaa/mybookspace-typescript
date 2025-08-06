@@ -2,10 +2,18 @@
 
 import FeedPost from './FeedPost';
 import { useFeed } from '@/hooks/useFeed';
+import { FeedPost as PostType } from '@/hooks/useFeed';
 
-export default function PostCard() {
-  const { posts, loading, error } = useFeed();
 
+interface PostCardProps {
+  posts: PostType[];
+  loading: boolean;
+  deletePost: (postId: string) => void;
+  likePost: (postId: string) => void;
+  addComment: (postId: string, content: string) => void;
+}
+
+export default function PostCard({ posts, loading, deletePost, likePost, addComment }: PostCardProps) {
   if (loading) {
     return (
       <div className="text-center py-6 md:py-8">
@@ -27,7 +35,13 @@ export default function PostCard() {
   return (
     <div className="space-y-3 md:space-y-4 flex-1 overflow-y-auto min-h-64 md:min-h-72">
       {posts.map(post => (
-        <FeedPost key={post._id} post={post} />
+        <FeedPost 
+          key={post._id} 
+          post={post}
+          deletePost={deletePost}
+          likePost={likePost}
+          addComment={addComment}
+        />
       ))}
     </div>
   );

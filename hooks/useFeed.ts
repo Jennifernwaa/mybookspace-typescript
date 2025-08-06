@@ -4,6 +4,7 @@ import { useNotification } from './useNotification';
 
 export interface FeedPost {
   _id: string;
+  postId: string;
   content: string;
   authorId: string;
   authorName: string;
@@ -36,7 +37,7 @@ export function useFeed() {
       setLoading(true);
       setError(null);
       
-      const response = await fetch('/api/feed', {
+      const response = await fetch(`/api/feed`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -48,7 +49,8 @@ export function useFeed() {
       }
 
       const data = await response.json();
-      setPosts(data.data || []);
+      setPosts(data.posts || []);
+      console.log('Fetched feed posts:', data.posts);
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to load feed';
@@ -64,7 +66,7 @@ export function useFeed() {
       setCreating(true);
       setError(null);
 
-      const response = await fetch('/api/feed/create', {
+      const response = await fetch(`/api/feed/create`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -93,14 +95,14 @@ export function useFeed() {
     }
   }, [showNotification]);
 
-  const deletePost = useCallback(async (postId: string) => {
+  const deletePost = useCallback(async (actualPostId: string) => {
     try {
-      const response = await fetch(`/api/feed/delete`, {
+      const response = await fetch(`/api/feed`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ postId }),
+        body: JSON.stringify({ postId: actualPostId }),
       });
 
       if (!response.ok) {
@@ -108,7 +110,7 @@ export function useFeed() {
       }
 
       // Remove the post from the posts array
-      setPosts(prev => prev.filter(post => post._id !== postId));
+      setPosts(prev => prev.filter(post => post.postId !== actualPostId));
       
       showNotification('Post deleted successfully! 🗑️', 'success');
     } catch (err) {
@@ -119,14 +121,14 @@ export function useFeed() {
     }
   }, [showNotification]);
 
-  const likePost = useCallback(async (postId: string) => {
+  const likePost = useCallback(async (actualPostId: string) => {
     try {
       const response = await fetch(`/api/feed/like`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ postId }),
+        body: JSON.stringify({ postId: actualPostId }),
       });
 
       if (!response.ok) {
@@ -135,11 +137,11 @@ export function useFeed() {
 
       const data = await response.json();
       
-      // Update the post in the posts array
-      setPosts(prev => prev.map(post => 
-        post._id === postId 
-          ? { ...post, likes: data.likes, isLiked: data.isLiked }
-          : post
+      // Update ALL feed entries that refer to this actualPostId
+      setPosts(prev => prev.map(feedEntry => 
+        feedEntry.postId === actualPostId 
+          ? { ...feedEntry, likes: data.likes, isLiked: data.isLiked }
+          : feedEntry
       ));
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to like post';
@@ -148,14 +150,14 @@ export function useFeed() {
     }
   }, [showNotification]);
 
-  const addComment = useCallback(async (postId: string, content: string) => {
+  const addComment = useCallback(async (actualPostId: string, content: string) => {
     try {
       const response = await fetch(`/api/feed/comment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ postId, content }),
+        body: JSON.stringify({ postId: actualPostId, content }),
       });
 
       if (!response.ok) {
@@ -164,11 +166,11 @@ export function useFeed() {
 
       const data = await response.json();
       
-      // Update the post's comments in the posts array
-      setPosts(prev => prev.map(post => 
-        post._id === postId 
-          ? { ...post, comments: data.comments }
-          : post
+      // Update ALL feed entries that refer to this actualPostId
+      setPosts(prev => prev.map(feedEntry => 
+        feedEntry.postId === actualPostId 
+          ? { ...feedEntry, comments: data.comments }
+          : feedEntry
       ));
       
       showNotification('Comment added! 💬', 'success');
@@ -184,11 +186,6 @@ export function useFeed() {
     fetchFeed();
   }, [fetchFeed]);
 
-  // Auto-refresh feed every 30 seconds
-  useEffect(() => {
-    const interval = setInterval(fetchFeed, 30000);
-    return () => clearInterval(interval);
-  }, [fetchFeed]);
 
   return {
     posts,

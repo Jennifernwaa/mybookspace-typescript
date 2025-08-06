@@ -29,7 +29,7 @@ export default function RecommendationPage () {
 
     try {
       // 1. Fetch recommendations from the Groq API
-      const groqRes = await fetch('/api/groq', {
+      const groqRes = await fetch(`/api/groq`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -95,7 +95,7 @@ export default function RecommendationPage () {
           <div className="text-center mb-12 animate-fade-in">
               <h1 className="text-5xl md:text-6xl font-bold text-space-brown leading-tight mb-4">
                   Discover Your Next 
-                  <span className="text-space-red">Great Read</span> 📖
+                  <span className="text-space-red"> Great Read</span> 📖
               </h1>
               <p className="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto">
                   Tell our AI about your favorite genres, authors, or books you've loved, and we'll find perfect recommendations just for you.

@@ -6,7 +6,14 @@ import DeletePostButton from './DeletePostButton';
 import CommentSection from './CommentSection';
 import { useUser } from '@/hooks/useUser';
 
-export default function FeedPost({ post }: { post: PostType }) {
+interface FeedPostProps {
+  post: PostType;
+  deletePost: (postId: string) => void;
+  likePost: (postId: string) => void;
+  addComment: (postId: string, content: string) => void;
+}
+
+export default function FeedPost({ post, deletePost, likePost, addComment }: FeedPostProps) {
   const { userData } = useUser();
   const isOwnPost = userData?._id === post.authorId;
 
@@ -19,16 +26,16 @@ export default function FeedPost({ post }: { post: PostType }) {
         <div className="flex-1">
           <div className="flex justify-between">
             <h3 className="text-space-brown font-semibold">{post.authorName}</h3>
-            {isOwnPost && <DeletePostButton postId={post._id} />}
+            {isOwnPost && <DeletePostButton postId={post.postId} onDelete={deletePost} />}
           </div>
           <p className="text-space-brown text-sm mt-1 whitespace-pre-wrap">{post.content}</p>
           <div className="flex items-center justify-between mt-2">
-            <LikeButton postId={post._id} isLiked={post.isLiked} likeCount={post.likes.length} />
+            <LikeButton postId={post.postId} isLiked={post.isLiked} likeCount={post.likes.length} onLike={likePost} />
             <span className="text-xs text-warm-brown opacity-60">
               {new Date(post.createdAt).toLocaleString()}
             </span>
           </div>
-          <CommentSection post={post} />
+          <CommentSection post={post} onAddComment={addComment} postId={post.postId}/>
         </div>
       </div>
     </div>
