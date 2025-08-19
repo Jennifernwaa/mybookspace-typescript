@@ -87,7 +87,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ isVisible, o
   return (
     <div
       id="editProfileModal"
-      className={`fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 transition-all duration-300 ${
+      className={`fixed inset-0 bg-black bg-opacity-30 backdrop-blur-md flex items-center justify-center z-50 transition-all duration-300 ${
         isVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
       }`}
     >

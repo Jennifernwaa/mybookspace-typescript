@@ -52,12 +52,6 @@ export const ProfileCard: React.FC<ProfileCardProps> = ({
             >
               Edit Profile
             </button>
-            <EditProfileModal
-              isVisible={showEditModal}
-              onClose={onModalClose}
-              onSubmit={onModalSubmit}
-              userData={userData}
-            />
             <button className="action-btn bg-white text-space-red px-8 py-3 rounded-full font-semibold border-2 border-space-red hover:bg-cream-light shadow-lg">
               Share Profile
             </button>

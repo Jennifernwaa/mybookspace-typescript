@@ -15,7 +15,11 @@ interface FeedPostProps {
 
 export default function FeedPost({ post, deletePost, likePost, addComment }: FeedPostProps) {
   const { userData } = useUser();
+  const currentUserId = userData?._id;
   const isOwnPost = userData?._id === post.authorId;
+
+  // Check if current user has liked the post
+  const isLiked = currentUserId ? post.likes.includes(currentUserId) : false;
 
   return (
     <div className="glass-card p-4 rounded-xl md:rounded-2xl animate-fade-in-up">
@@ -30,7 +34,12 @@ export default function FeedPost({ post, deletePost, likePost, addComment }: Fee
           </div>
           <p className="text-space-brown text-sm mt-1 whitespace-pre-wrap">{post.content}</p>
           <div className="flex items-center justify-between mt-2">
-            <LikeButton postId={post.postId} isLiked={post.isLiked} likeCount={post.likes.length} onLike={likePost} />
+            <LikeButton 
+            postId={post.postId} 
+            isLiked={isLiked} 
+            likeCount={post.likes.length} 
+            onLike={likePost} 
+            />
             <span className="text-xs text-warm-brown opacity-60">
               {new Date(post.createdAt).toLocaleString()}
             </span>

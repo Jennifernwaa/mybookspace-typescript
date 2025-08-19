@@ -1,5 +1,6 @@
 'use client';
 import BookCards from '@/components/BookCards';
+import { EditProfileModal } from '@/components/EditProfileModal';
 import ProfileCard from '@/components/Profile/ProfileCard';
 import RecentActivity from '@/components/Profile/RecentActivity';
 import UserStats from '@/components/Profile/UserStats';
@@ -53,6 +54,13 @@ export default function ProfilePage() {
         showEditModal={showEditModal}
         onModalClose={handleCloseModal}
         onModalSubmit={handleProfileUpdate}
+      />
+      
+      <EditProfileModal
+        isVisible={showEditModal}
+        onClose={handleCloseModal}
+        onSubmit={handleProfileUpdate}
+        userData={userData}
       />
 
       {/* User Reading Stats */}

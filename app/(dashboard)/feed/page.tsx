@@ -11,7 +11,7 @@ import PostCard from '@/components/Feed/PostCard';
 
 export default function FeedPage() {
   const { posts, loading: feedLoading, createPost, deletePost, likePost, addComment } = useFeed();
-  const { friends, loading: friendsLoading, addFriend, searchUsers } = useFriends();
+  const { friends, loading: friendsLoading, addFriend } = useFriends();
 
   return (
     <main className="parent grid grid-cols-1 md:grid-cols-5 md:grid-rows-5 gap-4 max-w-7xl mx-auto py-4 md:py-12 px-4 md:px-8 mb-20 md:mb-0">
@@ -38,34 +38,6 @@ export default function FeedPage() {
           addComment={addComment}
         />
 
-        {/* Loading State
-        {feedLoading ? (
-          <div className="text-center py-6 text-warm-brown opacity-70 animate-pulse">
-            ⏳ Loading your feed...
-          </div>
-        ) : posts.length === 0 ? (
-          // Empty State
-          <div className="text-center py-6 md:py-8">
-            <div className="text-4xl md:text-5xl mb-2">📭</div>
-            <p className="text-warm-brown opacity-70 text-sm md:text-base">
-              No posts yet. Share something to start your feed!
-            </p>
-          </div>
-        ) : (
-          // Feed Posts
-          <div className="space-y-3 md:space-y-4 flex-1 overflow-y-auto min-h-64 md:min-h-72">
-            {posts.map((post) => (
-              // Pass all necessary functions down to each post
-              <FeedPost 
-                key={post._id} 
-                post={post} 
-                deletePost={deletePost}
-                likePost={likePost}
-                addComment={addComment}
-              />
-            ))}
-          </div>
-        )} */}
       </section>
     </main>
   );
